@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Secrets / environment
+.env
+.env.*
+*.key
+
+# ChromaDB local persistence (if you switch to PersistentClient)
+chroma_db/
+*.sqlite3
+
+# Claude Code local settings (machine-specific)
+.claude/settings.local.json
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

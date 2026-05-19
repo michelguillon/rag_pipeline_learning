@@ -1,159 +1,168 @@
-# RAG Pipeline — Week 1
+# RAG Pipeline — Document Q&A with Mistral + ChromaDB
 
-A document Q&A system built from scratch with Mistral + ChromaDB.
-Every architectural decision is annotated in the source code.
+A retrieval-augmented question-answering system, built from scratch: it ingests
+a CV, embeds it into a vector store, retrieves the relevant chunks for a
+question, and has Mistral generate an answer grounded **only** in those chunks.
+
+Built as a Week-1 AI learning project. The point was not just working code —
+it was to understand and document *every* architectural decision. The reasoning
+lives in [rag_pipeline_spec.md](rag_pipeline_spec.md) (the spec) and
+[LEARNING_NOTES.md](LEARNING_NOTES.md) (what each phase taught).
+
+---
 
 ## Architecture
 
 ```
-INGEST (offline/batch):
-  Document → chunk_text() → embed_texts() → ChromaDB
-              ↑                ↑
-          512 tokens        mistral-embed
-          50 overlap         (1024 dims)
-
-QUERY (online/real-time):
-  Question → embed_texts() → ChromaDB.query() → top-k chunks
-                                                       ↓
-                                              build_prompt()
-                                                       ↓
-                                         mistral-large completion
-                                                       ↓
-                                                    Answer
+                        analyse.py ── Mistral ──► chunking recommendation
+Document (.docx) ───►        │                          │
+                       human approves              config.json
+                             │                          │
+                       review_chunks.py ──► preview chunks (no embedding)
+                             │                          │
+                       human confirms                   │
+                             │                          │
+                        ingest.py ── mistral-embed ──► ChromaDB (4 collections)
+                                                        │
+Question ──► query.py ── embed ──► ChromaDB ── top-k ──► Mistral ──► Answer
 ```
+
+Two **human-in-the-loop gates** by design: a human approves the chunking config
+(`analyse`) and reviews the actual chunks (`review_chunks`) before any embedding
+spend. The pipeline is a set of small single-purpose scripts over shared
+modules:
+
+| Module | Role |
+|--------|------|
+| `docx_parser.py` | `.docx` → paragraph records (style, size, list, dates) |
+| `chunker.py` | decode rule → chunks, for strategy A and A2 |
+| `mistral_helpers.py` | Mistral client + `call_with_retry()` |
+
+---
 
 ## Setup
 
-```bash
-# Install dependencies
-pip install -r requirements.txt
+Requires Docker Desktop. The container provides Python 3.13 and all
+dependencies — nothing is installed on the host.
 
-# Set your Mistral API key
-export MISTRAL_API_KEY=your_key_here
+```powershell
+# 1. API key
+Copy-Item .env.example .env        # then paste your MISTRAL_API_KEY into .env
 
-# Hours 1-2: Run the basics experiments
-python mistral_basics.py
+# 2. Build the image
+docker compose build
 
-# Hours 3-7: Run the full pipeline
-python rag_pipeline.py your_document.txt
-
-# Hours 8-10: Stress test
-python stress_test.py your_document.txt
+# 3. Drop a CV at data/cv.docx
 ```
 
-## Architectural Decisions
-
-### Chunking
-| Decision | Choice | Reasoning |
-|----------|--------|-----------|
-| Chunk size | 512 tokens | Balance between context richness and retrieval precision |
-| Overlap | 50 tokens | Prevents key sentences from being split at boundaries |
-| Method | Word-approximate | Avoids tokeniser dependency; ±5% accuracy is acceptable |
-
-### Embedding
-| Decision | Choice | Reasoning |
-|----------|--------|-----------|
-| Model | `mistral-embed` | Same provider as completion = consistent vector space |
-| Dimensions | 1024 | Fixed by model; higher = richer representation |
-| Batching | 32 texts/batch | Reduces API round-trips; respects rate limits |
-
-### Storage
-| Decision | Choice | Reasoning |
-|----------|--------|-----------|
-| Vector DB | ChromaDB | Zero setup, local, perfect for prototyping |
-| Distance metric | Cosine | Angular distance; better for text than L2 |
-| Client | EphemeralClient | Re-ingests on each run; forces re-examination of ingestion |
-
-### Retrieval
-| Decision | Choice | Reasoning |
-|----------|--------|-----------|
-| top_k | 3 | Balances context richness vs. token cost vs. noise |
-| Query embedding | Same model as chunks | Must share the same vector space |
-
-### Generation
-| Decision | Choice | Reasoning |
-|----------|--------|-----------|
-| Model | `mistral-large-latest` | Best quality for learning; downgrade after understanding tradeoffs |
-| Temperature | 0.1 | Near-deterministic; reduces hallucination in factual Q&A |
-| Context instruction | "Answer ONLY from context" | Core RAG anti-hallucination mechanism |
+`.env` is git-ignored; the project directory is mounted into the container, so
+`config.json`, `chroma_db/` and `outputs/` persist between runs.
 
 ---
 
-## Stress Test Findings
+## Running the pipeline
 
-*Fill this in after running stress_test.py. These are interview gold.*
+```powershell
+# 1. Analyse the document, get a chunking recommendation, write config.json
+docker compose run pipeline python analyse.py data/cv.docx
 
-### Chunk Size: 256 vs 512 vs 1024
+# 2. Preview the proposed chunks before spending anything on embeddings
+docker compose run pipeline python review_chunks.py data/cv.docx
 
-| Metric | 256 tokens | 512 tokens | 1024 tokens |
-|--------|-----------|-----------|-------------|
-| Chunks created | — | — | — |
-| Avg retrieval similarity | — | — | — |
-| Hallucination rate | — | — | — |
-| Observation | | | |
+# 3. Embed the chunks and store them in the 4 ChromaDB collections
+docker compose run pipeline python ingest.py data/cv.docx
 
-**My finding:**
-> [Write your observation here after running the experiments]
+# 4. Ask a question
+docker compose run pipeline python query.py "What did he do at Microsoft?" `
+  --collection cv_role_cosine --top-k 3 --format labelled
 
-### top_k: 1 vs 5 vs 10
+# 5. Run the full experiment matrix (resumable)
+docker compose run pipeline python stress_test.py
+```
 
-| Metric | top_k=1 | top_k=5 | top_k=10 |
-|--------|---------|---------|---------|
-| Avg tokens/query | — | — | — |
-| Multi-part answer quality | — | — | — |
-| Noise introduced | — | — | — |
-
-**My finding:**
-> [Write your observation here]
-
-### Overlap: 0 vs 50 vs 100
-
-**My finding:**
-> [Write your observation here]
-
-### Hallucination test
-
-- Question used: "What is the population of Mars?"
-- Expected: model refuses with "I cannot find this in the provided documents"
-- Actual:
-
-**My finding:**
-> [Write what happened and what the prompt change did/didn't fix]
-
-### Long document degradation
-
-- Document used:
-- Length:
-- Where it started to fail:
-
-**My finding:**
-> [Write your observation here]
+`analyse.py --trace` writes the full prompt + Mistral response to `outputs/`.
+`stress_test.py` checkpoints after every cell — re-run it to resume.
 
 ---
 
-## What I Can Now Say in an Interview
+## Architectural decisions
 
-> "I built a RAG pipeline from scratch using Mistral's embedding and completion APIs.
-> I understand the architectural tradeoffs around chunk size — smaller chunks give more
-> precise retrieval but lose surrounding context; larger chunks are richer but dilute the
-> relevance signal. I found that top_k=3 is a pragmatic default: top_k=1 misses
-> multi-part answers while top_k=10 burns tokens and introduces noise. The most
-> important anti-hallucination mechanism is instructing the model to only answer from
-> provided context — without this, it blends retrieved content with training data in
-> ways that are hard to detect. I also understand when to move from ChromaDB to a
-> managed vector store like Pinecone, and why cosine distance outperforms L2 for text."
+Full reasoning is in [rag_pipeline_spec.md](rag_pipeline_spec.md). The load-bearing ones:
+
+- **Semantic chunking, not fixed-size.** Each chunk is a structural unit (a
+  role, or a bullet) — no chunk-size or overlap parameter. Two strategies are
+  built and compared: **A** (one chunk per role) and **A2** (one chunk per
+  bullet + a context prefix).
+- **Profile the document, don't assume it.** Real Word files encode hierarchy
+  inconsistently — `analyse.py` enumerates formatting fingerprints and flags
+  inconsistency rather than hardcoding "Heading 3 = company".
+- **ChromaDB, persistent**, 4 collections (chunk strategy × cosine/L2 metric).
+- **`mistral-embed`** for documents and queries (the one un-swappable choice);
+  **`mistral-small`/`large`** for generation; temperature 0.1.
+- **Anti-hallucination**: the model is instructed to answer only from context
+  and to emit an exact fallback phrase otherwise — making hallucination
+  measurable.
 
 ---
 
-## Production Upgrade Path
+## Stress test findings
 
-When this moves to production, these are the changes to make:
+112 cells: 4 collections × top_k × flat/labelled context × 7 questions, on
+`mistral-small`. (The small-vs-large model comparison was skipped to stay
+within free-tier limits.)
 
-| Component | Prototype | Production |
-|-----------|-----------|------------|
-| Vector DB | ChromaDB EphemeralClient | ChromaDB PersistentClient or Pinecone |
-| Chunking | Word-approximate | Exact token count via tiktoken |
-| Embedding | Sequential batches | Async parallel with rate limiting |
-| Retrieval | Cosine similarity only | Hybrid: semantic + keyword (BM25) |
-| Hallucination | Prompt instruction | + confidence scoring + citation tracking |
-| Observability | Print statements | LangSmith / Arize / custom logging |
+- **Hallucination refusal: 16/16 cells, 100%.** Every out-of-scope question
+  returned the exact fallback phrase, in every configuration — the strongest
+  and most robust result.
+- **top_k drives token cost, roughly linearly** (~250→~480 tokens for role
+  chunks, k=1→k=3). Retrieved context is paid for on every call.
+- **Labelled context costs ~10–25% more tokens than flat**, with no visible
+  answer-quality gain on this corpus.
+- **Strategy A vs A2 produced near-equivalent answers.** The expected
+  advantage of whole-role chunks (A) for synthesis questions did not clearly
+  materialise — with enough top_k, per-bullet chunks (A2) reconstruct the
+  context.
+
+**Meta-finding:** on a small (~36-chunk), clean, single-document corpus the
+pipeline is forgiving — strategy/metric/format choices move token cost far more
+than answer quality. The *discipline* (grounding, human review, checkpointing)
+mattered more than the *tuning*. Tuning earns its keep at scale.
+
+---
+
+## What I can say about this (interview notes — draft)
+
+> I built a RAG pipeline end to end with Mistral and ChromaDB, and treated it
+> as an architecture exercise. The most useful lesson was that real documents
+> lie about their structure — a CV's visual hierarchy and its underlying Word
+> markup are different things, so I built the analysis step to *profile* a
+> document and surface its inconsistencies rather than assume a clean format.
+> I made chunking, retrieval and generation explicit, reviewable stages with
+> human-in-the-loop gates, because in enterprise RAG a misconfigured ingest is
+> expensive to undo. I ran a 112-cell experiment and found that on a small,
+> clean corpus the tuning knobs (chunk strategy, distance metric, context
+> format) move token cost far more than answer quality — the discipline
+> matters more than the tuning, and the tuning earns its keep at scale.
+
+*Personalise this before using it.*
+
+---
+
+## Production upgrade path
+
+| Area | This project | Production |
+|------|-------------|------------|
+| Vector store | ChromaDB (local) | Pinecone / pgvector when corpus > ~1M vectors or multi-tenant |
+| API tier | Mistral free tier (rate-limited) | paid tier; batch embedding |
+| Document types | single CV (`.docx`) | format-agnostic loader + pluggable chunking-strategy registry per document class |
+| Metadata | attached, lightly used | metadata-filtered retrieval (by company / date / tenant) — the real scaling lever |
+| Retrieval | semantic only | hybrid semantic + BM25 keyword |
+| Evaluation | token cost, similarity, hallucination refusal | + automated answer-quality scoring |
+
+---
+
+## Before making this public
+
+- [ ] Replace the real CV with `data/sample_cv.docx` (fake, same structure)
+- [ ] Audit `outputs/` — it contains real CV text from trace/stress-test runs
+- [ ] Confirm `.env` is git-ignored and absent from history

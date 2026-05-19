@@ -1,0 +1,29 @@
+{
+  "strategy": "A2",
+  "document_type": "table_based",
+  "section_signal": "Heading 1",
+  "bullet_signal": "paragraph has a numPr element (not a style name)",
+  "decode_note": "company / sub-section headers are detected by font size, not by style \u2014 see consistency_flags",
+  "collections": {
+    "A": [
+      "cv_role_cosine",
+      "cv_role_l2"
+    ],
+    "A2": [
+      "cv_bullet_cosine",
+      "cv_bullet_l2"
+    ]
+  },
+  "metadata_fields": [
+    "company",
+    "job_title",
+    "dates",
+    "section_name"
+  ],
+  "prefix_template": "[{company} | {job_title} | {dates}]",
+  "consistency_flags": [
+    "Bullets appear under 2 different styles (List Paragraph, Normal) \u2014 detect bullets by the numPr element, not by style name.",
+    "2 paragraph(s) are larger than body text (11.0pt) but use NO heading style ('Michel Guillon', 'Utiq') \u2014 a style-only parser would miss these as structural boundaries.",
+    "4 heading-styled paragraph(s) carry a direct font-size override \u2014 heading level is not a reliable size proxy."
+  ]
+}

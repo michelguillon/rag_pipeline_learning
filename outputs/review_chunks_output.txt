@@ -1,0 +1,367 @@
+
+════════════════════════════════════════════════════════════════════
+STRATEGY A
+════════════════════════════════════════════════════════════════════
+────────────────────────────────────────────────────────────────────
+CHUNK 000 | id=cv_a_000 | strategy=A | role/section
+  words:   8
+────────────────────────────────────────────────────────────────────
+Michel Guillon
+michel.guillon@gmail.com, mobile: +44 772 581 4002
+
+────────────────────────────────────────────────────────────────────
+CHUNK 001 | id=cv_a_001 | strategy=A | role/section
+  section: Profile
+  words:   82
+────────────────────────────────────────────────────────────────────
+Profile
+Technical pre-sales leader with 15 years' experience driving enterprise growth across digital advertising, identity infrastructure, and consent technology. Built and led a 15-person solutions consulting organisation at Xandr, overseeing a $25M book of business and delivering 20% year-on-year revenue growth through deep technical partnerships with agencies and independent trading desks. Bridges the gap between semiconductor-grade engineering rigour and hands-on solutions leadership, helping organisations scale customer-facing functions and drive partner-led growth. Because ultimately, partner success is the only route to sustainable growth.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 002 | id=cv_a_002 | strategy=A | role/section
+  section: Profile
+  words:   31
+────────────────────────────────────────────────────────────────────
+Core Skills
+Solutions Consulting Leadership · Pre-Sales Operating Models · Identity Infrastructure · Programmatic · Product Management · Partner Strategy & Enablement · Go-To-Market Design · B2B Enterprise · Team Building
+
+────────────────────────────────────────────────────────────────────
+CHUNK 003 | id=cv_a_003 | strategy=A | role/section
+  section: Work experience
+  company: Utiq
+  title:   Head of Solution Consulting
+  dates:   Mar 2024 – present
+  words:   92
+────────────────────────────────────────────────────────────────────
+Utiq — Head of Solution Consulting — Mar 2024 – present
+Joined at a pre-commercial stage to define and establish the UK solutions consulting function, including operating model, engagement approach, and integration frameworks across publishers, platforms, and CTV partners.
+Worked directly with C-level clients and senior stakeholders to shape go-to-market strategy, while leading the design of Utiq’s identity graph solution, combining technical architecture, privacy compliance, and partner integration with a commercially driven approach.
+Activated initial pilot campaigns across multiple publisher partners, achieving 40% incremental audience reach and informing the broader commercialisation roadmap.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 004 | id=cv_a_004 | strategy=A | role/section
+  section: Work experience
+  company: Microsoft
+  title:   Senior Product Manager
+  dates:   Apr 2022 – Mar 2024
+  words:   107
+────────────────────────────────────────────────────────────────────
+Microsoft — Senior Product Manager — Apr 2022 – Mar 2024
+Initiated cross-device graph offering redesign leading to 8x increase in audience expansions into CTV channel and reducing infrastructure cost by $300k per year.
+Scoped and delivered Real-Time Data Provider capability as part of a cross-functional product team, contributing to $5M in secured revenue.
+Partnered with engineering to restructure identity processing architecture, bringing it back to our own data centres, reducing both cost and operational risk while enabling new product capabilities.
+Took ownership of a stalled publisher identity management feature, leading a full redesign of the API and UI to meet evolving client privacy and control requirements.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 005 | id=cv_a_005 | strategy=A | role/section
+  section: Work experience
+  company: Appnexus / Xandr
+  title:   Director, Solution Consulting
+  dates:   Dec 2019 – Apr 2022
+  words:   140
+────────────────────────────────────────────────────────────────────
+Appnexus / Xandr — Director, Solution Consulting — Dec 2019 – Apr 2022
+Led and scaled a 15-person solutions consulting organisation supporting a $25M book of business, driving 20% year-on-year revenue growth through strategic partnerships and solution-led engagement with Tier 1 agencies and trading desks.
+Designed and implemented the team’s operating model, introducing role specialisation, engagement frameworks, and clearer alignment with sales to improve scalability and consistency across enterprise clients.
+Partnered with sales, product, and engineering leadership to drive go-to-market strategy, ensuring successful rollout and adoption of new platform capabilities.
+Expanded into new client segments by launching services tailored to agency trading desks, generating $3M in new business.
+Acted as senior technical stakeholder across key strategic accounts, leading complex integrations, product collaborations, and long-term partnership development.
+Coached and mentored consultants and managers, strengthening the leadership bench and supporting internal progression.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 006 | id=cv_a_006 | strategy=A | role/section
+  section: Work experience
+  company: Appnexus / Xandr
+  title:   Solution Consultant & Senior Solution Consultant
+  dates:   2017 – 2019
+  words:   66
+────────────────────────────────────────────────────────────────────
+Appnexus / Xandr — Solution Consultant & Senior Solution Consultant — 2017 – 2019
+Drove 20% year-on-year revenue growth across multiple Tier 1 accounts ($15M), deepening engagement through new product testing and API integrations to secure long-term budgets.
+Co-developed a Chrome extension to address a product feature gap, reaching 110+ client adoptions and retaining over $500k of at-risk revenue within the first two months of launch.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 007 | id=cv_a_007 | strategy=A | role/section
+  section: Work experience
+  company: Imagination Technologies, PowerVR Graphics
+  dates:   2009 – 2016
+  words:   106
+────────────────────────────────────────────────────────────────────
+Imagination Technologies, PowerVR Graphics — 2009 – 2016
+Progressive technical and BD roles in semiconductor IP, supporting Tier 1 partners across smartphone, TV, and automotive markets in APAC.
+Gathered industry and customer inputs to shape the GPU product roadmap, feeding back internally to adapt the existing product line leading to multi-million business across 3 new licensees.
+Led technical consulting with Marvell Semiconductor architecture teams, scoping SoC solutions and closing 10% of annual licensing revenue target.
+Led revamp of the Graphics IP delivery process covering product release, technical documentation and sales collateral doubling delivery frequency while supporting a 4x growth in licensing revenue over the previous generation.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 008 | id=cv_a_008 | strategy=A | role/section
+  section: Education
+  dates:   2004 – 2006
+  words:   27
+────────────────────────────────────────────────────────────────────
+Education — 2004 – 2006
+MSc VLSI Design, University of Westminster (UK)
+Bachelor of electronic engineering, ESTE (France)
+Exchange senior engineering student at Harvey Mudd College (CA)
+
+────────────────────────────────────────────────────────────────────
+CHUNK 009 | id=cv_a_009 | strategy=A | role/section
+  section: Languages
+  words:   6
+────────────────────────────────────────────────────────────────────
+Languages
+Bilingual in French and English
+
+────────────────────────────────────────────────────────────────────
+CHUNK 010 | id=cv_a_010 | strategy=A | role/section
+  section: Interests
+  words:   13
+────────────────────────────────────────────────────────────────────
+Interests
+Passion for craft and wood working, hand making furniture, yoga and capoeira
+
+Strategy A: 11 chunks | avg 61 words | min 6 | max 140
+
+════════════════════════════════════════════════════════════════════
+STRATEGY A2
+════════════════════════════════════════════════════════════════════
+────────────────────────────────────────────────────────────────────
+CHUNK 000 | id=cv_a2_000 | strategy=A2 | role/section
+  words:   6
+────────────────────────────────────────────────────────────────────
+michel.guillon@gmail.com, mobile: +44 772 581 4002
+
+────────────────────────────────────────────────────────────────────
+CHUNK 001 | id=cv_a2_001 | strategy=A2 | role/section
+  section: Profile
+  words:   82
+────────────────────────────────────────────────────────────────────
+[Profile] Technical pre-sales leader with 15 years' experience driving enterprise growth across digital advertising, identity infrastructure, and consent technology. Built and led a 15-person solutions consulting organisation at Xandr, overseeing a $25M book of business and delivering 20% year-on-year revenue growth through deep technical partnerships with agencies and independent trading desks. Bridges the gap between semiconductor-grade engineering rigour and hands-on solutions leadership, helping organisations scale customer-facing functions and drive partner-led growth. Because ultimately, partner success is the only route to sustainable growth.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 002 | id=cv_a2_002 | strategy=A2 | role/section
+  section: Profile
+  words:   30
+────────────────────────────────────────────────────────────────────
+[Profile] Solutions Consulting Leadership · Pre-Sales Operating Models · Identity Infrastructure · Programmatic · Product Management · Partner Strategy & Enablement · Go-To-Market Design · B2B Enterprise · Team Building
+
+────────────────────────────────────────────────────────────────────
+CHUNK 003 | id=cv_a2_003 | strategy=A2 | bullet
+  section: Work experience
+  company: Utiq
+  title:   Head of Solution Consulting
+  dates:   Mar 2024 – present
+  words:   39
+────────────────────────────────────────────────────────────────────
+[Utiq | Head of Solution Consulting | Mar 2024 – present] Joined at a pre-commercial stage to define and establish the UK solutions consulting function, including operating model, engagement approach, and integration frameworks across publishers, platforms, and CTV partners.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 004 | id=cv_a2_004 | strategy=A2 | bullet
+  section: Work experience
+  company: Utiq
+  title:   Head of Solution Consulting
+  dates:   Mar 2024 – present
+  words:   45
+────────────────────────────────────────────────────────────────────
+[Utiq | Head of Solution Consulting | Mar 2024 – present] Worked directly with C-level clients and senior stakeholders to shape go-to-market strategy, while leading the design of Utiq’s identity graph solution, combining technical architecture, privacy compliance, and partner integration with a commercially driven approach.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 005 | id=cv_a2_005 | strategy=A2 | bullet
+  section: Work experience
+  company: Utiq
+  title:   Head of Solution Consulting
+  dates:   Mar 2024 – present
+  words:   30
+────────────────────────────────────────────────────────────────────
+[Utiq | Head of Solution Consulting | Mar 2024 – present] Activated initial pilot campaigns across multiple publisher partners, achieving 40% incremental audience reach and informing the broader commercialisation roadmap.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 006 | id=cv_a2_006 | strategy=A2 | bullet
+  section: Work experience
+  company: Microsoft
+  title:   Senior Product Manager
+  dates:   Apr 2022 – Mar 2024
+  words:   34
+────────────────────────────────────────────────────────────────────
+[Microsoft | Senior Product Manager | Apr 2022 – Mar 2024] Initiated cross-device graph offering redesign leading to 8x increase in audience expansions into CTV channel and reducing infrastructure cost by $300k per year.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 007 | id=cv_a2_007 | strategy=A2 | bullet
+  section: Work experience
+  company: Microsoft
+  title:   Senior Product Manager
+  dates:   Apr 2022 – Mar 2024
+  words:   31
+────────────────────────────────────────────────────────────────────
+[Microsoft | Senior Product Manager | Apr 2022 – Mar 2024] Scoped and delivered Real-Time Data Provider capability as part of a cross-functional product team, contributing to $5M in secured revenue.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 008 | id=cv_a2_008 | strategy=A2 | bullet
+  section: Work experience
+  company: Microsoft
+  title:   Senior Product Manager
+  dates:   Apr 2022 – Mar 2024
+  words:   38
+────────────────────────────────────────────────────────────────────
+[Microsoft | Senior Product Manager | Apr 2022 – Mar 2024] Partnered with engineering to restructure identity processing architecture, bringing it back to our own data centres, reducing both cost and operational risk while enabling new product capabilities.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 009 | id=cv_a2_009 | strategy=A2 | bullet
+  section: Work experience
+  company: Microsoft
+  title:   Senior Product Manager
+  dates:   Apr 2022 – Mar 2024
+  words:   37
+────────────────────────────────────────────────────────────────────
+[Microsoft | Senior Product Manager | Apr 2022 – Mar 2024] Took ownership of a stalled publisher identity management feature, leading a full redesign of the API and UI to meet evolving client privacy and control requirements.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 010 | id=cv_a2_010 | strategy=A2 | bullet
+  section: Work experience
+  company: Appnexus / Xandr
+  title:   Director, Solution Consulting
+  dates:   Dec 2019 – Apr 2022
+  words:   45
+────────────────────────────────────────────────────────────────────
+[Appnexus / Xandr | Director, Solution Consulting | Dec 2019 – Apr 2022] Led and scaled a 15-person solutions consulting organisation supporting a $25M book of business, driving 20% year-on-year revenue growth through strategic partnerships and solution-led engagement with Tier 1 agencies and trading desks.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 011 | id=cv_a2_011 | strategy=A2 | bullet
+  section: Work experience
+  company: Appnexus / Xandr
+  title:   Director, Solution Consulting
+  dates:   Dec 2019 – Apr 2022
+  words:   38
+────────────────────────────────────────────────────────────────────
+[Appnexus / Xandr | Director, Solution Consulting | Dec 2019 – Apr 2022] Designed and implemented the team’s operating model, introducing role specialisation, engagement frameworks, and clearer alignment with sales to improve scalability and consistency across enterprise clients.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 012 | id=cv_a2_012 | strategy=A2 | bullet
+  section: Work experience
+  company: Appnexus / Xandr
+  title:   Director, Solution Consulting
+  dates:   Dec 2019 – Apr 2022
+  words:   33
+────────────────────────────────────────────────────────────────────
+[Appnexus / Xandr | Director, Solution Consulting | Dec 2019 – Apr 2022] Partnered with sales, product, and engineering leadership to drive go-to-market strategy, ensuring successful rollout and adoption of new platform capabilities.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 013 | id=cv_a2_013 | strategy=A2 | bullet
+  section: Work experience
+  company: Appnexus / Xandr
+  title:   Director, Solution Consulting
+  dates:   Dec 2019 – Apr 2022
+  words:   31
+────────────────────────────────────────────────────────────────────
+[Appnexus / Xandr | Director, Solution Consulting | Dec 2019 – Apr 2022] Expanded into new client segments by launching services tailored to agency trading desks, generating $3M in new business.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 014 | id=cv_a2_014 | strategy=A2 | bullet
+  section: Work experience
+  company: Appnexus / Xandr
+  title:   Director, Solution Consulting
+  dates:   Dec 2019 – Apr 2022
+  words:   31
+────────────────────────────────────────────────────────────────────
+[Appnexus / Xandr | Director, Solution Consulting | Dec 2019 – Apr 2022] Acted as senior technical stakeholder across key strategic accounts, leading complex integrations, product collaborations, and long-term partnership development.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 015 | id=cv_a2_015 | strategy=A2 | bullet
+  section: Work experience
+  company: Appnexus / Xandr
+  title:   Director, Solution Consulting
+  dates:   Dec 2019 – Apr 2022
+  words:   27
+────────────────────────────────────────────────────────────────────
+[Appnexus / Xandr | Director, Solution Consulting | Dec 2019 – Apr 2022] Coached and mentored consultants and managers, strengthening the leadership bench and supporting internal progression.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 016 | id=cv_a2_016 | strategy=A2 | bullet
+  section: Work experience
+  company: Appnexus / Xandr
+  title:   Solution Consultant & Senior Solution Consultant
+  dates:   2017 – 2019
+  words:   38
+────────────────────────────────────────────────────────────────────
+[Appnexus / Xandr | Solution Consultant & Senior Solution Consultant | 2017 – 2019] Drove 20% year-on-year revenue growth across multiple Tier 1 accounts ($15M), deepening engagement through new product testing and API integrations to secure long-term budgets.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 017 | id=cv_a2_017 | strategy=A2 | bullet
+  section: Work experience
+  company: Appnexus / Xandr
+  title:   Solution Consultant & Senior Solution Consultant
+  dates:   2017 – 2019
+  words:   42
+────────────────────────────────────────────────────────────────────
+[Appnexus / Xandr | Solution Consultant & Senior Solution Consultant | 2017 – 2019] Co-developed a Chrome extension to address a product feature gap, reaching 110+ client adoptions and retaining over $500k of at-risk revenue within the first two months of launch.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 018 | id=cv_a2_018 | strategy=A2 | bullet
+  section: Work experience
+  company: Imagination Technologies, PowerVR Graphics
+  dates:   2009 – 2016
+  words:   36
+────────────────────────────────────────────────────────────────────
+[Imagination Technologies, PowerVR Graphics | 2009 – 2016] Gathered industry and customer inputs to shape the GPU product roadmap, feeding back internally to adapt the existing product line leading to multi-million business across 3 new licensees.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 019 | id=cv_a2_019 | strategy=A2 | bullet
+  section: Work experience
+  company: Imagination Technologies, PowerVR Graphics
+  dates:   2009 – 2016
+  words:   27
+────────────────────────────────────────────────────────────────────
+[Imagination Technologies, PowerVR Graphics | 2009 – 2016] Led technical consulting with Marvell Semiconductor architecture teams, scoping SoC solutions and closing 10% of annual licensing revenue target.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 020 | id=cv_a2_020 | strategy=A2 | bullet
+  section: Work experience
+  company: Imagination Technologies, PowerVR Graphics
+  dates:   2009 – 2016
+  words:   39
+────────────────────────────────────────────────────────────────────
+[Imagination Technologies, PowerVR Graphics | 2009 – 2016] Led revamp of the Graphics IP delivery process covering product release, technical documentation and sales collateral doubling delivery frequency while supporting a 4x growth in licensing revenue over the previous generation.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 021 | id=cv_a2_021 | strategy=A2 | role/section
+  section: Work experience
+  company: Imagination Technologies, PowerVR Graphics
+  dates:   2009 – 2016
+  words:   28
+────────────────────────────────────────────────────────────────────
+[Imagination Technologies, PowerVR Graphics | 2009 – 2016] Progressive technical and BD roles in semiconductor IP, supporting Tier 1 partners across smartphone, TV, and automotive markets in APAC.
+
+────────────────────────────────────────────────────────────────────
+CHUNK 022 | id=cv_a2_022 | strategy=A2 | role/section
+  section: Education
+  dates:   2004 – 2006
+  words:   23
+────────────────────────────────────────────────────────────────────
+[Education] MSc VLSI Design, University of Westminster (UK)
+Bachelor of electronic engineering, ESTE (France)
+Exchange senior engineering student at Harvey Mudd College (CA)
+
+────────────────────────────────────────────────────────────────────
+CHUNK 023 | id=cv_a2_023 | strategy=A2 | role/section
+  section: Languages
+  words:   6
+────────────────────────────────────────────────────────────────────
+[Languages] Bilingual in French and English
+
+────────────────────────────────────────────────────────────────────
+CHUNK 024 | id=cv_a2_024 | strategy=A2 | role/section
+  section: Interests
+  words:   13
+────────────────────────────────────────────────────────────────────
+[Interests] Passion for craft and wood working, hand making furniture, yoga and capoeira
+
+Strategy A2: 25 chunks | avg 33 words | min 6 | max 82
+
+════════════════════════════════════════════════════════════════════
+SUMMARY
+════════════════════════════════════════════════════════════════════
+Strategy A: 11 chunks | avg 61 words | min 6 | max 140
+Strategy A2: 25 chunks | avg 33 words | min 6 | max 82
+
+Do the chunks look right? Proceed to ingestion? (y/n): 
+(no interactive input — review the chunks above, then run ingest.py when ready)

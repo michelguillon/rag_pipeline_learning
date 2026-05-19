@@ -1,0 +1,21 @@
+# Keep the Docker build context small and the image clean.
+# Anything here is excluded from `COPY . .` in the Dockerfile.
+
+# Secrets — NEVER bake the API key into an image.
+.env
+.env.*
+
+# Git internals — not needed at runtime.
+.git
+.gitignore
+
+# Runtime state — these are bind-mounted by docker-compose, not built in.
+chroma_db/
+data/
+outputs/
+
+# Python / tooling noise.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.claude/

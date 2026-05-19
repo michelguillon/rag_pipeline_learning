@@ -1,37 +1,38 @@
 ────────────────────────────────────────────────────────────────
 STRUCTURAL ANALYSIS
 ────────────────────────────────────────────────────────────────
-Paragraphs (non-empty): 43  | in tables: 43
+Paragraphs (non-empty): 48  | in tables: 48
 
-FORMATTING-FINGERPRINT PROFILE  (11 distinct)
+FORMATTING-FINGERPRINT PROFILE  (12 distinct)
   count  style                size bold list  sample
-      9  List Paragraph         11    0    1  Joined at a pre-commercial stage t
-      9  Normal                 11    0    1  Led and scaled a 15-person solutio
-      6  Normal                 11    0    0  Technical pre-sales leader with 15
+     12  List Paragraph         11    0    1  Joined at seed stage to define and
+      9  Normal                 11    0    1  Took ownership of a blocked publis
+      6  Heading 3              11    0    0  Head of Solutions Engineering
       5  Heading 1              16    0    0  Profile
-      5  Heading 3              11    0    0  Head of Solution Consulting
+      5  Normal                 11    0    0  Technical pre-sales leader with 16
       3  Heading 4              14    0    0  Core Skills
-      2  Normal                 11    1    0  MSc VLSI Design, University of Wes
-      1  Normal                 18    1    0  Michel Guillon
-      1  Normal                 10    0    0  michel.guillon@gmail.com, mobile: 
-      1  Normal                 14    1    0  Utiq
-      1  Heading 3              14    0    0  Microsoft
+      2  Normal                 12    0    0  james.hartley@email.com  · mobile:
+      2  Normal                 11    1    0  MSc VLSI Design, University of Bri
+      1  Normal                 18    1    0  James Hartley
+      1  Normal                 14    1    0  Telepath Technologies
+      1  Heading 3              14    0    0  Google
+      1  Normal                 12    1    0  Senior Customer Engineer
 
 CONSISTENCY REPORT  (3 flag(s))
   ! Bullets appear under 2 different styles (List Paragraph, Normal) — detect bullets by the numPr element, not by style name.
-  ! 2 paragraph(s) are larger than body text (11.0pt) but use NO heading style ('Michel Guillon', 'Utiq') — a style-only parser would miss these as structural boundaries.
+  ! 5 paragraph(s) are larger than body text (11.0pt) but use NO heading style ('James Hartley', 'james.hartley@email.com  ', 'Telepath Technologies') — a style-only parser would miss these as structural boundaries.
   ! 4 heading-styled paragraph(s) carry a direct font-size override — heading level is not a reliable size proxy.
 
 SECTIONS  (detected via 'Heading 1')
-  • Profile                            paras= 3 bullets= 0 words=112 (avg 37/para)
-  • Work experience                    paras=28 bullets=18 words=483 (avg 17/para)
-  • Education                          paras= 3 bullets= 0 words= 22 (avg 7/para)
+  • Profile                            paras= 3 bullets= 0 words=104 (avg 35/para)
+  • Work experience                    paras=33 bullets=21 words=477 (avg 14/para)
+  • Education                          paras= 3 bullets= 0 words= 20 (avg 7/para)
   • Languages                          paras= 1 bullets= 0 words=  5 (avg 5/para)
   • Interests                          paras= 1 bullets= 0 words= 12 (avg 12/para)
 
 ESTIMATED CHUNK COUNTS  (rough — informs the recommendation)
-  Option A  (per role/section): ~14
-  Option A2 (per bullet)      : ~22  (18 bullets)
+  Option A  (per role/section): ~15
+  Option A2 (per bullet)      : ~25  (21 bullets)
 
 ────────────────────────────────────────────────────────────────
 PROMPT SENT TO MISTRAL (mistral-large-latest)
@@ -50,8 +51,8 @@ STRUCTURAL PROFILE
       "size": 11.0,
       "bold": false,
       "is_list": true,
-      "count": 9,
-      "sample": "Joined at a pre-commercial stage to define and establish the UK soluti"
+      "count": 12,
+      "sample": "Joined at seed stage to define and build the UK solutions engineering "
     },
     {
       "style": "Normal",
@@ -59,15 +60,15 @@ STRUCTURAL PROFILE
       "bold": false,
       "is_list": true,
       "count": 9,
-      "sample": "Led and scaled a 15-person solutions consulting organisation supportin"
+      "sample": "Took ownership of a blocked publisher controls feature, leading a full"
     },
     {
-      "style": "Normal",
+      "style": "Heading 3",
       "size": 11.0,
       "bold": false,
       "is_list": false,
       "count": 6,
-      "sample": "Technical pre-sales leader with 15 years' experience driving enterpris"
+      "sample": "Head of Solutions Engineering"
     },
     {
       "style": "Heading 1",
@@ -78,12 +79,12 @@ STRUCTURAL PROFILE
       "sample": "Profile"
     },
     {
-      "style": "Heading 3",
+      "style": "Normal",
       "size": 11.0,
       "bold": false,
       "is_list": false,
       "count": 5,
-      "sample": "Head of Solution Consulting"
+      "sample": "Technical pre-sales leader with 16 years' experience driving enterpris"
     },
     {
       "style": "Heading 4",
@@ -95,11 +96,19 @@ STRUCTURAL PROFILE
     },
     {
       "style": "Normal",
+      "size": 12.0,
+      "bold": false,
+      "is_list": false,
+      "count": 2,
+      "sample": "james.hartley@email.com  \u00b7 mobile: +44 7891 234 567"
+    },
+    {
+      "style": "Normal",
       "size": 11.0,
       "bold": true,
       "is_list": false,
       "count": 2,
-      "sample": "MSc VLSI Design, University of Westminster (UK)"
+      "sample": "MSc VLSI Design, University of Bristol (UK)"
     },
     {
       "style": "Normal",
@@ -107,15 +116,7 @@ STRUCTURAL PROFILE
       "bold": true,
       "is_list": false,
       "count": 1,
-      "sample": "Michel Guillon"
-    },
-    {
-      "style": "Normal",
-      "size": 10.0,
-      "bold": false,
-      "is_list": false,
-      "count": 1,
-      "sample": "michel.guillon@gmail.com, mobile: +44 772 581 4002"
+      "sample": "James Hartley"
     },
     {
       "style": "Normal",
@@ -123,7 +124,7 @@ STRUCTURAL PROFILE
       "bold": true,
       "is_list": false,
       "count": 1,
-      "sample": "Utiq"
+      "sample": "Telepath Technologies"
     },
     {
       "style": "Heading 3",
@@ -131,12 +132,20 @@ STRUCTURAL PROFILE
       "bold": false,
       "is_list": false,
       "count": 1,
-      "sample": "Microsoft"
+      "sample": "Google"
+    },
+    {
+      "style": "Normal",
+      "size": 12.0,
+      "bold": true,
+      "is_list": false,
+      "count": 1,
+      "sample": "Senior Customer Engineer"
     }
   ],
   "consistency_flags": [
     "Bullets appear under 2 different styles (List Paragraph, Normal) \u2014 detect bullets by the numPr element, not by style name.",
-    "2 paragraph(s) are larger than body text (11.0pt) but use NO heading style ('Michel Guillon', 'Utiq') \u2014 a style-only parser would miss these as structural boundaries.",
+    "5 paragraph(s) are larger than body text (11.0pt) but use NO heading style ('James Hartley', 'james.hartley@email.com  ', 'Telepath Technologies') \u2014 a style-only parser would miss these as structural boundaries.",
     "4 heading-styled paragraph(s) carry a direct font-size override \u2014 heading level is not a reliable size proxy."
   ],
   "sections": [
@@ -144,19 +153,19 @@ STRUCTURAL PROFILE
       "title": "Profile",
       "paragraphs": 3,
       "bullets": 0,
-      "words": 112
+      "words": 104
     },
     {
       "title": "Work experience",
-      "paragraphs": 28,
-      "bullets": 18,
-      "words": 483
+      "paragraphs": 33,
+      "bullets": 21,
+      "words": 477
     },
     {
       "title": "Education",
       "paragraphs": 3,
       "bullets": 0,
-      "words": 22
+      "words": 20
     },
     {
       "title": "Languages",
@@ -172,9 +181,9 @@ STRUCTURAL PROFILE
     }
   ],
   "estimated_chunks": {
-    "A": 14,
-    "A2": 22,
-    "n_bullets": 18
+    "A": 15,
+    "A2": 25,
+    "n_bullets": 21
   }
 }
 
@@ -207,19 +216,20 @@ RAW RESPONSE FROM MISTRAL
 ────────────────────────────────────────────────────────────────
 {
   "recommended_strategy": "A2",
-  "reasoning": "The document is a CV with dense, bullet-pointed work experience sections. Strategy A2 (one chunk per bullet) enables precise retrieval for specific skills, achievements, or responsibilities while maintaining context via a prefix. This aligns with user queries likely targeting granular details (e.g., 'experience with enterprise solutions consulting').",
+  "reasoning": "The document contains a high density of bullet points (21) under work experience, which are likely to be specific, actionable details. Strategy A2 allows for precise retrieval of these granular details while maintaining context through a prefix, better supporting narrow or skill-specific queries without losing the broader role context.",
   "metadata_fields": [
     "company",
     "job_title",
-    "dates",
+    "start_date",
+    "end_date",
     "section_name",
     "is_bullet"
   ],
-  "prefix_template": "Role: {job_title} at {company} ({dates}). Section: {section_name}. Detail: {chunk_text}",
+  "prefix_template": "Role: {job_title} at {company} ({start_date} to {end_date}), Section: {section_name}. Context: ",
   "risks": [
-    "Weaker synthesis for queries requiring cross-bullet reasoning (e.g., 'summarize leadership style across roles').",
-    "Potential redundancy if bullets share near-identical context (e.g., repeated skills).",
-    "Risk of over-segmentation if bullets are very short, diluting semantic relevance."
+    "Weaker synthesis for questions requiring cross-bullet reasoning within a single role (e.g., 'What were the key outcomes of James' work at Google?').",
+    "Potential redundancy if the prefix context is too verbose, diluting the relevance of the bullet content.",
+    "Risk of missing implicit connections between bullets if they are treated as isolated chunks."
   ]
 }
 
@@ -227,15 +237,15 @@ RAW RESPONSE FROM MISTRAL
 MISTRAL RECOMMENDATION
 ────────────────────────────────────────────────────────────────
 Recommended strategy : A2
-Reasoning            : The document is a CV with dense, bullet-pointed work experience sections. Strategy A2 (one chunk per bullet) enables precise retrieval for specific skills, achievements, or responsibilities while maintaining context via a prefix. This aligns with user queries likely targeting granular details (e.g., 'experience with enterprise solutions consulting').
-Metadata fields      : ['company', 'job_title', 'dates', 'section_name', 'is_bullet']
-Prefix template      : Role: {job_title} at {company} ({dates}). Section: {section_name}. Detail: {chunk_text}
+Reasoning            : The document contains a high density of bullet points (21) under work experience, which are likely to be specific, actionable details. Strategy A2 allows for precise retrieval of these granular details while maintaining context through a prefix, better supporting narrow or skill-specific queries without losing the broader role context.
+Metadata fields      : ['company', 'job_title', 'start_date', 'end_date', 'section_name', 'is_bullet']
+Prefix template      : Role: {job_title} at {company} ({start_date} to {end_date}), Section: {section_name}. Context: 
 Risks:
-  - Weaker synthesis for queries requiring cross-bullet reasoning (e.g., 'summarize leadership style across roles').
-  - Potential redundancy if bullets share near-identical context (e.g., repeated skills).
-  - Risk of over-segmentation if bullets are very short, diluting semantic relevance.
+  - Weaker synthesis for questions requiring cross-bullet reasoning within a single role (e.g., 'What were the key outcomes of James' work at Google?').
+  - Potential redundancy if the prefix context is too verbose, diluting the relevance of the bullet content.
+  - Risk of missing implicit connections between bullets if they are treated as isolated chunks.
 
-Tokens: 1306 prompt + 222 completion = 1528
+Tokens: 1369 prompt + 234 completion = 1603
 
 ────────────────────────────────────────────────────────────────
 PROPOSED config.json
@@ -259,14 +269,15 @@ PROPOSED config.json
   "metadata_fields": [
     "company",
     "job_title",
-    "dates",
+    "start_date",
+    "end_date",
     "section_name",
     "is_bullet"
   ],
-  "prefix_template": "Role: {job_title} at {company} ({dates}). Section: {section_name}. Detail: {chunk_text}",
+  "prefix_template": "Role: {job_title} at {company} ({start_date} to {end_date}), Section: {section_name}. Context: ",
   "consistency_flags": [
     "Bullets appear under 2 different styles (List Paragraph, Normal) \u2014 detect bullets by the numPr element, not by style name.",
-    "2 paragraph(s) are larger than body text (11.0pt) but use NO heading style ('Michel Guillon', 'Utiq') \u2014 a style-only parser would miss these as structural boundaries.",
+    "5 paragraph(s) are larger than body text (11.0pt) but use NO heading style ('James Hartley', 'james.hartley@email.com  ', 'Telepath Technologies') \u2014 a style-only parser would miss these as structural boundaries.",
     "4 heading-styled paragraph(s) carry a direct font-size override \u2014 heading level is not a reliable size proxy."
   ]
 }

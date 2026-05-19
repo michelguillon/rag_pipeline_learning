@@ -52,7 +52,7 @@ Copy-Item .env.example .env        # then paste your MISTRAL_API_KEY into .env
 # 2. Build the image
 docker compose build
 
-# 3. Drop a CV at data/cv.docx
+# 3. Drop a CV at data/sample_cv.docx
 ```
 
 `.env` is git-ignored; the project directory is mounted into the container, so
@@ -64,16 +64,16 @@ docker compose build
 
 ```powershell
 # 1. Analyse the document, get a chunking recommendation, write config.json
-docker compose run pipeline python analyse.py data/cv.docx
+docker compose run pipeline python analyse.py data/sample_cv.docx
 
 # 2. Preview the proposed chunks before spending anything on embeddings
-docker compose run pipeline python review_chunks.py data/cv.docx
+docker compose run pipeline python review_chunks.py data/sample_cv.docx
 
 # 3. Embed the chunks and store them in the 4 ChromaDB collections
-docker compose run pipeline python ingest.py data/cv.docx
+docker compose run pipeline python ingest.py data/sample_cv.docx
 
 # 4. Ask a question
-docker compose run pipeline python query.py "What did he do at Microsoft?" `
+docker compose run pipeline python query.py "What was his most recent role?" `
   --collection cv_role_cosine --top-k 3 --format labelled
 
 # 5. Run the full experiment matrix (resumable)
@@ -97,11 +97,12 @@ Full reasoning is in [rag_pipeline_spec.md](rag_pipeline_spec.md). The load-bear
   inconsistently — `analyse.py` enumerates formatting fingerprints and flags
   inconsistency rather than hardcoding "Heading 3 = company".
 - **ChromaDB, persistent**, 4 collections (chunk strategy × cosine/L2 metric).
-- **`mistral-embed`** for documents and queries (the one un-swappable choice);
-  **`mistral-small`/`large`** for generation; temperature 0.1.
+- **`mistral-embed`** for documents and queries — the one un-swappable choice,
+  because vectors from different embedding models live in incompatible spaces;
+  **`mistral-small`/`large`** for generation, swappable freely; temperature 0.1.
 - **Anti-hallucination**: the model is instructed to answer only from context
   and to emit an exact fallback phrase otherwise — making hallucination
-  measurable.
+  measurable, not just observable.
 
 ---
 
@@ -128,23 +129,39 @@ pipeline is forgiving — strategy/metric/format choices move token cost far mor
 than answer quality. The *discipline* (grounding, human review, checkpointing)
 mattered more than the *tuning*. Tuning earns its keep at scale.
 
+**Generalisation test:** running the pipeline on two additional CVs confirmed
+the boundary. The fingerprint profiler described both correctly and diagnosed
+its own downstream failures. The chunker, hardcoded to the first CV's
+conventions, collapsed silently — producing whole-CV mega-chunks with no error.
+The profiler generalises. The chunker doesn't, yet.
+
 ---
 
-## What I can say about this (interview notes — draft)
+## Reflections
 
-> I built a RAG pipeline end to end with Mistral and ChromaDB, and treated it
-> as an architecture exercise. The most useful lesson was that real documents
-> lie about their structure — a CV's visual hierarchy and its underlying Word
-> markup are different things, so I built the analysis step to *profile* a
-> document and surface its inconsistencies rather than assume a clean format.
-> I made chunking, retrieval and generation explicit, reviewable stages with
-> human-in-the-loop gates, because in enterprise RAG a misconfigured ingest is
-> expensive to undo. I ran a 112-cell experiment and found that on a small,
-> clean corpus the tuning knobs (chunk strategy, distance metric, context
-> format) move token cost far more than answer quality — the discipline
-> matters more than the tuning, and the tuning earns its keep at scale.
+The most useful finding wasn't in the stress test — it was earlier,
+when a naive parser silently read 13 of 43 paragraphs and produced
+wrong-but-plausible chunks with no error. Real Word documents encode
+hierarchy inconsistently: a CV's visual structure and its underlying
+markup are two different things, and a parser that assumes otherwise
+fails quietly. I rebuilt the analysis step as a fingerprint profiler
+that discovers structure rather than assuming it — and when I tested
+on two other CVs, the profiler correctly described both and diagnosed
+its own downstream failures. The chunker, which was still hardcoded,
+collapsed. That gap is the next build.
 
-*Personalise this before using it.*
+The 112-cell stress test confirmed something less obvious: on a small,
+clean corpus, the tuning knobs — chunk strategy, distance metric,
+context format — move token cost far more than answer quality. The
+discipline mattered more than the tuning: grounding the model strictly
+to retrieved context, inserting human review before embedding spend,
+checkpointing a batch job that would otherwise lose 91 completed calls
+on failure 92. These aren't glamorous decisions. They're the ones that
+determine whether a RAG system works on a customer's actual documents,
+not just the clean sample it was demoed on.
+
+The tuning earns its keep at scale and with noisier retrieval — which
+is exactly where this is going next.
 
 ---
 
@@ -152,17 +169,10 @@ mattered more than the *tuning*. Tuning earns its keep at scale.
 
 | Area | This project | Production |
 |------|-------------|------------|
+| Chunking | Hardcoded decode rules | Config-driven, derived per-document by `analyse.py` |
 | Vector store | ChromaDB (local) | Pinecone / pgvector when corpus > ~1M vectors or multi-tenant |
-| API tier | Mistral free tier (rate-limited) | paid tier; batch embedding |
-| Document types | single CV (`.docx`) | format-agnostic loader + pluggable chunking-strategy registry per document class |
-| Metadata | attached, lightly used | metadata-filtered retrieval (by company / date / tenant) — the real scaling lever |
-| Retrieval | semantic only | hybrid semantic + BM25 keyword |
-| Evaluation | token cost, similarity, hallucination refusal | + automated answer-quality scoring |
-
----
-
-## Before making this public
-
-- [ ] Replace the real CV with `data/sample_cv.docx` (fake, same structure)
-- [ ] Audit `outputs/` — it contains real CV text from trace/stress-test runs
-- [ ] Confirm `.env` is git-ignored and absent from history
+| API tier | Mistral free tier (rate-limited) | Paid tier; batch embedding |
+| Document types | Single CV (`.docx`) | Format-agnostic loader + pluggable chunking-strategy registry per document class |
+| Metadata | Attached, lightly used | Metadata-filtered retrieval (by company / date / tenant) — the real scaling lever |
+| Retrieval | Semantic only | Hybrid semantic + BM25 keyword |
+| Evaluation | Token cost, similarity, hallucination refusal | + Automated answer-quality scoring |

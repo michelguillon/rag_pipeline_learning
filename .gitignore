@@ -17,14 +17,14 @@ venv/
 chroma_db/
 *.sqlite3
 
-# Real CV — never committed. Keep the data/ folder itself via .gitkeep.
+# Real CVs — never committed. The fake sample CV IS committed (the example).
 data/*.docx
 data/*.pdf
 data/*.txt
 !data/.gitkeep
+!data/sample_cv.docx
 
-# outputs/ is tracked intentionally (experiment results = interview artifact).
-# Before going public: regenerate outputs with the fake sample CV.
+# outputs/ is tracked intentionally — holds the sample CV's example artifacts.
 
 # Claude Code local settings (machine-specific)
 .claude/settings.local.json

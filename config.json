@@ -17,13 +17,15 @@
   "metadata_fields": [
     "company",
     "job_title",
-    "dates",
-    "section_name"
+    "start_date",
+    "end_date",
+    "section_name",
+    "is_bullet"
   ],
-  "prefix_template": "[{company} | {job_title} | {dates}]",
+  "prefix_template": "Role: {job_title} at {company} ({start_date} to {end_date}), Section: {section_name}. Context: ",
   "consistency_flags": [
     "Bullets appear under 2 different styles (List Paragraph, Normal) \u2014 detect bullets by the numPr element, not by style name.",
-    "2 paragraph(s) are larger than body text (11.0pt) but use NO heading style ('Michel Guillon', 'Utiq') \u2014 a style-only parser would miss these as structural boundaries.",
+    "5 paragraph(s) are larger than body text (11.0pt) but use NO heading style ('James Hartley', 'james.hartley@email.com  ', 'Telepath Technologies') \u2014 a style-only parser would miss these as structural boundaries.",
     "4 heading-styled paragraph(s) carry a direct font-size override \u2014 heading level is not a reliable size proxy."
   ]
 }

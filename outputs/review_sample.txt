@@ -4,105 +4,109 @@ STRATEGY A
 ════════════════════════════════════════════════════════════════════
 ────────────────────────────────────────────────────────────────────
 CHUNK 000 | id=cv_a_000 | strategy=A | role/section
-  words:   8
+  section: Profile
+  words:   75
 ────────────────────────────────────────────────────────────────────
-Michel Guillon
-michel.guillon@gmail.com, mobile: +44 772 581 4002
+Profile
+Technical pre-sales leader with 16 years' experience driving enterprise growth across digital advertising, data clean rooms, and audience identity platforms. Built and led a 12-person solutions engineering organisation at Verizon Media, overseeing a $30M book of business and delivering 25% year-on-year revenue growth through deep technical partnerships with DSPs and independent trading desks. Bridges the gap between data engineering rigour and commercially driven solutions leadership, helping organisations scale partner-facing functions and accelerate platform adoption.
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 001 | id=cv_a_001 | strategy=A | role/section
   section: Profile
-  words:   82
+  words:   30
 ────────────────────────────────────────────────────────────────────
-Profile
-Technical pre-sales leader with 15 years' experience driving enterprise growth across digital advertising, identity infrastructure, and consent technology. Built and led a 15-person solutions consulting organisation at Xandr, overseeing a $25M book of business and delivering 20% year-on-year revenue growth through deep technical partnerships with agencies and independent trading desks. Bridges the gap between semiconductor-grade engineering rigour and hands-on solutions leadership, helping organisations scale customer-facing functions and drive partner-led growth. Because ultimately, partner success is the only route to sustainable growth.
+Core Skills
+Solutions Engineering Leadership · Pre-Sales Operating Models · Identity Resolution · Programmatic Advertising · Product Strategy · Partner Enablement · Go-To-Market Design · B2B Enterprise · Team Development
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 002 | id=cv_a_002 | strategy=A | role/section
-  section: Profile
-  words:   31
+  section: Work experience
+  company: Telepath Technologies
+  title:   Head of Solutions Engineering
+  dates:   Mar 2024 – present
+  words:   99
 ────────────────────────────────────────────────────────────────────
-Core Skills
-Solutions Consulting Leadership · Pre-Sales Operating Models · Identity Infrastructure · Programmatic · Product Management · Partner Strategy & Enablement · Go-To-Market Design · B2B Enterprise · Team Building
+Telepath Technologies — Head of Solutions Engineering — Mar 2024 – present
+Joined at seed stage to define and build the UK solutions engineering function from scratch, covering operating model, integration playbooks, and onboarding frameworks across SSP, DSP, and retail media partners
+Worked directly with C-suite stakeholders to shape go-to-market strategy and align platform capabilities to commercial priorities
+Led the technical design of Telepath's cookieless identity routing layer, combining probabilistic matching, consent signal propagation, and publisher-side activation
+Delivered three anchor publisher integrations within six months, achieving 35% incremental addressable reach and providing key evidence for the Series A fundraise
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 003 | id=cv_a_003 | strategy=A | role/section
   section: Work experience
-  company: Utiq
-  title:   Head of Solution Consulting
-  dates:   Mar 2024 – present
-  words:   92
+  company: Google
+  title:   Senior Product Manager
+  dates:   Apr 2022 – Mar 2024
+  words:   96
 ────────────────────────────────────────────────────────────────────
-Utiq — Head of Solution Consulting — Mar 2024 – present
-Joined at a pre-commercial stage to define and establish the UK solutions consulting function, including operating model, engagement approach, and integration frameworks across publishers, platforms, and CTV partners.
-Worked directly with C-level clients and senior stakeholders to shape go-to-market strategy, while leading the design of Utiq’s identity graph solution, combining technical architecture, privacy compliance, and partner integration with a commercially driven approach.
-Activated initial pilot campaigns across multiple publisher partners, achieving 40% incremental audience reach and informing the broader commercialisation roadmap.
+Google — Senior Product Manager — Apr 2022 – Mar 2024
+Initiated a cross-channel audience portability redesign resulting in a 6x increase in CTV match rates and reducing pipeline processing costs by $400k annually
+Scoped and delivered a first-party data activation API as part of a cross-functional squad, contributing to $6M in contracted revenue
+Partnered with infrastructure teams to migrate identity resolution workloads to regional data centres, reducing latency and meeting EU data residency requirements
+Took ownership of a blocked publisher controls feature, leading a full UX and API redesign in response to evolving privacy regulation
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 004 | id=cv_a_004 | strategy=A | role/section
   section: Work experience
-  company: Microsoft
-  title:   Senior Product Manager
-  dates:   Apr 2022 – Mar 2024
-  words:   107
+  company: The Trade Desk / MediaMath
+  title:   Director, Solution Consulting
+  dates:   Dec 2019 – Apr 2022
+  words:   108
 ────────────────────────────────────────────────────────────────────
-Microsoft — Senior Product Manager — Apr 2022 – Mar 2024
-Initiated cross-device graph offering redesign leading to 8x increase in audience expansions into CTV channel and reducing infrastructure cost by $300k per year.
-Scoped and delivered Real-Time Data Provider capability as part of a cross-functional product team, contributing to $5M in secured revenue.
-Partnered with engineering to restructure identity processing architecture, bringing it back to our own data centres, reducing both cost and operational risk while enabling new product capabilities.
-Took ownership of a stalled publisher identity management feature, leading a full redesign of the API and UI to meet evolving client privacy and control requirements.
+The Trade Desk / MediaMath — Director, Solution Consulting — Dec 2019 – Apr 2022
+Led and scaled a 12-person solutions engineering team supporting a $30M book of business, delivering 25% year-on-year revenue growth through technical partnership programmes with Tier 1 agencies and holding groups
+Designed the team's engagement operating model, introducing vertical specialisation, scoping templates, and clearer sales alignment to improve consistency across enterprise accounts
+Expanded into retail media by launching a dedicated solutions track for commerce platforms, generating $4M in incremental pipeline
+Acted as senior technical stakeholder for strategic accounts, leading complex integrations and multi-quarter roadmap alignment
+Mentored consultants and team leads, driving several internal promotions
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 005 | id=cv_a_005 | strategy=A | role/section
   section: Work experience
-  company: Appnexus / Xandr
-  title:   Director, Solution Consulting
-  dates:   Dec 2019 – Apr 2022
-  words:   140
+  company: The Trade Desk / MediaMath
+  title:   Solution Consultant & Senior Solution Consultant
+  dates:   2017 – 2019
+  words:   61
 ────────────────────────────────────────────────────────────────────
-Appnexus / Xandr — Director, Solution Consulting — Dec 2019 – Apr 2022
-Led and scaled a 15-person solutions consulting organisation supporting a $25M book of business, driving 20% year-on-year revenue growth through strategic partnerships and solution-led engagement with Tier 1 agencies and trading desks.
-Designed and implemented the team’s operating model, introducing role specialisation, engagement frameworks, and clearer alignment with sales to improve scalability and consistency across enterprise clients.
-Partnered with sales, product, and engineering leadership to drive go-to-market strategy, ensuring successful rollout and adoption of new platform capabilities.
-Expanded into new client segments by launching services tailored to agency trading desks, generating $3M in new business.
-Acted as senior technical stakeholder across key strategic accounts, leading complex integrations, product collaborations, and long-term partnership development.
-Coached and mentored consultants and managers, strengthening the leadership bench and supporting internal progression.
+The Trade Desk / MediaMath — Solution Consultant & Senior Solution Consultant — 2017 – 2019
+Drove 22% year-on-year revenue growth across Tier 1 accounts ($18M combined) through custom API integrations and beta product programmes
+Co-built an internal reporting connector to bridge a product gap, adopted by 90+ client teams within three months and retaining approximately $600k of at-risk annual spend
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 006 | id=cv_a_006 | strategy=A | role/section
   section: Work experience
-  company: Appnexus / Xandr
-  title:   Solution Consultant & Senior Solution Consultant
-  dates:   2017 – 2019
-  words:   66
+  company: Imagination Technologies
+  title:   Business Development Engineering Manager
+  dates:   2015 – 2016
+  words:   75
 ────────────────────────────────────────────────────────────────────
-Appnexus / Xandr — Solution Consultant & Senior Solution Consultant — 2017 – 2019
-Drove 20% year-on-year revenue growth across multiple Tier 1 accounts ($15M), deepening engagement through new product testing and API integrations to secure long-term budgets.
-Co-developed a Chrome extension to address a product feature gap, reaching 110+ client adoptions and retaining over $500k of at-risk revenue within the first two months of launch.
+Imagination Technologies — Business Development Engineering Manager — 2015 – 2016
+Gathered customer and partner inputs to inform the media IP roadmap, resulting in feature additions that secured multi-million licensing agreements across four new accounts
+Led technical scoping engagements with MediaTek and Renesas architecture teams, contributing to 12% of annual licensing revenue
+Revamped the IP delivery and documentation process, doubling release cadence while supporting 5x growth in licensing revenue compared to the previous product generation
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 007 | id=cv_a_007 | strategy=A | role/section
   section: Work experience
-  company: Imagination Technologies, PowerVR Graphics
-  dates:   2009 – 2016
-  words:   106
+  company: Application Specialist
+  words:   66
 ────────────────────────────────────────────────────────────────────
-Imagination Technologies, PowerVR Graphics — 2009 – 2016
-Progressive technical and BD roles in semiconductor IP, supporting Tier 1 partners across smartphone, TV, and automotive markets in APAC.
-Gathered industry and customer inputs to shape the GPU product roadmap, feeding back internally to adapt the existing product line leading to multi-million business across 3 new licensees.
-Led technical consulting with Marvell Semiconductor architecture teams, scoping SoC solutions and closing 10% of annual licensing revenue target.
-Led revamp of the Graphics IP delivery process covering product release, technical documentation and sales collateral doubling delivery frequency while supporting a 4x growth in licensing revenue over the previous generation.
+Application Specialist
+Gathered customer and partner inputs to inform the media IP roadmap, resulting in feature additions that secured multi-million licensing agreements across four new accounts
+Led technical scoping engagements with MediaTek and Renesas architecture teams, contributing to 12% of annual licensing revenue
+Revamped the IP delivery and documentation process, doubling release cadence while supporting 5x growth in licensing revenue compared to the previous product generation
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 008 | id=cv_a_008 | strategy=A | role/section
   section: Education
   dates:   2004 – 2006
-  words:   27
+  words:   25
 ────────────────────────────────────────────────────────────────────
 Education — 2004 – 2006
-MSc VLSI Design, University of Westminster (UK)
-Bachelor of electronic engineering, ESTE (France)
-Exchange senior engineering student at Harvey Mudd College (CA)
+MSc VLSI Design, University of Bristol (UK)
+Bachelor of electronic engineering, INSA (France)
+Exchange senior engineering student University of Californa
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 009 | id=cv_a_009 | strategy=A | role/section
@@ -120,248 +124,260 @@ CHUNK 010 | id=cv_a_010 | strategy=A | role/section
 Interests
 Passion for craft and wood working, hand making furniture, yoga and capoeira
 
-Strategy A: 11 chunks | avg 61 words | min 6 | max 140
+Strategy A: 11 chunks | avg 59 words | min 6 | max 108
 
 ════════════════════════════════════════════════════════════════════
 STRATEGY A2
 ════════════════════════════════════════════════════════════════════
 ────────────────────────────────────────────────────────────────────
 CHUNK 000 | id=cv_a2_000 | strategy=A2 | role/section
-  words:   6
+  section: Profile
+  words:   75
 ────────────────────────────────────────────────────────────────────
-michel.guillon@gmail.com, mobile: +44 772 581 4002
+[Profile] Technical pre-sales leader with 16 years' experience driving enterprise growth across digital advertising, data clean rooms, and audience identity platforms. Built and led a 12-person solutions engineering organisation at Verizon Media, overseeing a $30M book of business and delivering 25% year-on-year revenue growth through deep technical partnerships with DSPs and independent trading desks. Bridges the gap between data engineering rigour and commercially driven solutions leadership, helping organisations scale partner-facing functions and accelerate platform adoption.
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 001 | id=cv_a2_001 | strategy=A2 | role/section
   section: Profile
-  words:   82
+  words:   29
 ────────────────────────────────────────────────────────────────────
-[Profile] Technical pre-sales leader with 15 years' experience driving enterprise growth across digital advertising, identity infrastructure, and consent technology. Built and led a 15-person solutions consulting organisation at Xandr, overseeing a $25M book of business and delivering 20% year-on-year revenue growth through deep technical partnerships with agencies and independent trading desks. Bridges the gap between semiconductor-grade engineering rigour and hands-on solutions leadership, helping organisations scale customer-facing functions and drive partner-led growth. Because ultimately, partner success is the only route to sustainable growth.
+[Profile] Solutions Engineering Leadership · Pre-Sales Operating Models · Identity Resolution · Programmatic Advertising · Product Strategy · Partner Enablement · Go-To-Market Design · B2B Enterprise · Team Development
 
 ────────────────────────────────────────────────────────────────────
-CHUNK 002 | id=cv_a2_002 | strategy=A2 | role/section
-  section: Profile
-  words:   30
+CHUNK 002 | id=cv_a2_002 | strategy=A2 | bullet
+  section: Work experience
+  company: Telepath Technologies
+  title:   Head of Solutions Engineering
+  dates:   Mar 2024 – present
+  words:   45
 ────────────────────────────────────────────────────────────────────
-[Profile] Solutions Consulting Leadership · Pre-Sales Operating Models · Identity Infrastructure · Programmatic · Product Management · Partner Strategy & Enablement · Go-To-Market Design · B2B Enterprise · Team Building
+Role: Head of Solutions Engineering at Telepath Technologies ( to ), Section: Work experience. Context: Joined at seed stage to define and build the UK solutions engineering function from scratch, covering operating model, integration playbooks, and onboarding frameworks across SSP, DSP, and retail media partners
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 003 | id=cv_a2_003 | strategy=A2 | bullet
   section: Work experience
-  company: Utiq
-  title:   Head of Solution Consulting
+  company: Telepath Technologies
+  title:   Head of Solutions Engineering
   dates:   Mar 2024 – present
-  words:   39
+  words:   31
 ────────────────────────────────────────────────────────────────────
-[Utiq | Head of Solution Consulting | Mar 2024 – present] Joined at a pre-commercial stage to define and establish the UK solutions consulting function, including operating model, engagement approach, and integration frameworks across publishers, platforms, and CTV partners.
+Role: Head of Solutions Engineering at Telepath Technologies ( to ), Section: Work experience. Context: Worked directly with C-suite stakeholders to shape go-to-market strategy and align platform capabilities to commercial priorities
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 004 | id=cv_a2_004 | strategy=A2 | bullet
   section: Work experience
-  company: Utiq
-  title:   Head of Solution Consulting
+  company: Telepath Technologies
+  title:   Head of Solutions Engineering
   dates:   Mar 2024 – present
-  words:   45
+  words:   34
 ────────────────────────────────────────────────────────────────────
-[Utiq | Head of Solution Consulting | Mar 2024 – present] Worked directly with C-level clients and senior stakeholders to shape go-to-market strategy, while leading the design of Utiq’s identity graph solution, combining technical architecture, privacy compliance, and partner integration with a commercially driven approach.
+Role: Head of Solutions Engineering at Telepath Technologies ( to ), Section: Work experience. Context: Led the technical design of Telepath's cookieless identity routing layer, combining probabilistic matching, consent signal propagation, and publisher-side activation
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 005 | id=cv_a2_005 | strategy=A2 | bullet
   section: Work experience
-  company: Utiq
-  title:   Head of Solution Consulting
+  company: Telepath Technologies
+  title:   Head of Solutions Engineering
   dates:   Mar 2024 – present
-  words:   30
+  words:   37
 ────────────────────────────────────────────────────────────────────
-[Utiq | Head of Solution Consulting | Mar 2024 – present] Activated initial pilot campaigns across multiple publisher partners, achieving 40% incremental audience reach and informing the broader commercialisation roadmap.
+Role: Head of Solutions Engineering at Telepath Technologies ( to ), Section: Work experience. Context: Delivered three anchor publisher integrations within six months, achieving 35% incremental addressable reach and providing key evidence for the Series A fundraise
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 006 | id=cv_a2_006 | strategy=A2 | bullet
   section: Work experience
-  company: Microsoft
+  company: Google
   title:   Senior Product Manager
   dates:   Apr 2022 – Mar 2024
-  words:   34
+  words:   36
 ────────────────────────────────────────────────────────────────────
-[Microsoft | Senior Product Manager | Apr 2022 – Mar 2024] Initiated cross-device graph offering redesign leading to 8x increase in audience expansions into CTV channel and reducing infrastructure cost by $300k per year.
+Role: Senior Product Manager at Google ( to ), Section: Work experience. Context: Initiated a cross-channel audience portability redesign resulting in a 6x increase in CTV match rates and reducing pipeline processing costs by $400k annually
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 007 | id=cv_a2_007 | strategy=A2 | bullet
   section: Work experience
-  company: Microsoft
+  company: Google
   title:   Senior Product Manager
   dates:   Apr 2022 – Mar 2024
-  words:   31
+  words:   33
 ────────────────────────────────────────────────────────────────────
-[Microsoft | Senior Product Manager | Apr 2022 – Mar 2024] Scoped and delivered Real-Time Data Provider capability as part of a cross-functional product team, contributing to $5M in secured revenue.
+Role: Senior Product Manager at Google ( to ), Section: Work experience. Context: Scoped and delivered a first-party data activation API as part of a cross-functional squad, contributing to $6M in contracted revenue
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 008 | id=cv_a2_008 | strategy=A2 | bullet
   section: Work experience
-  company: Microsoft
+  company: Google
   title:   Senior Product Manager
   dates:   Apr 2022 – Mar 2024
-  words:   38
+  words:   34
 ────────────────────────────────────────────────────────────────────
-[Microsoft | Senior Product Manager | Apr 2022 – Mar 2024] Partnered with engineering to restructure identity processing architecture, bringing it back to our own data centres, reducing both cost and operational risk while enabling new product capabilities.
+Role: Senior Product Manager at Google ( to ), Section: Work experience. Context: Partnered with infrastructure teams to migrate identity resolution workloads to regional data centres, reducing latency and meeting EU data residency requirements
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 009 | id=cv_a2_009 | strategy=A2 | bullet
   section: Work experience
-  company: Microsoft
+  company: Google
   title:   Senior Product Manager
   dates:   Apr 2022 – Mar 2024
-  words:   37
+  words:   34
 ────────────────────────────────────────────────────────────────────
-[Microsoft | Senior Product Manager | Apr 2022 – Mar 2024] Took ownership of a stalled publisher identity management feature, leading a full redesign of the API and UI to meet evolving client privacy and control requirements.
+Role: Senior Product Manager at Google ( to ), Section: Work experience. Context: Took ownership of a blocked publisher controls feature, leading a full UX and API redesign in response to evolving privacy regulation
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 010 | id=cv_a2_010 | strategy=A2 | bullet
   section: Work experience
-  company: Appnexus / Xandr
+  company: The Trade Desk / MediaMath
   title:   Director, Solution Consulting
   dates:   Dec 2019 – Apr 2022
-  words:   45
+  words:   47
 ────────────────────────────────────────────────────────────────────
-[Appnexus / Xandr | Director, Solution Consulting | Dec 2019 – Apr 2022] Led and scaled a 15-person solutions consulting organisation supporting a $25M book of business, driving 20% year-on-year revenue growth through strategic partnerships and solution-led engagement with Tier 1 agencies and trading desks.
+Role: Director, Solution Consulting at The Trade Desk / MediaMath ( to ), Section: Work experience. Context: Led and scaled a 12-person solutions engineering team supporting a $30M book of business, delivering 25% year-on-year revenue growth through technical partnership programmes with Tier 1 agencies and holding groups
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 011 | id=cv_a2_011 | strategy=A2 | bullet
   section: Work experience
-  company: Appnexus / Xandr
+  company: The Trade Desk / MediaMath
   title:   Director, Solution Consulting
   dates:   Dec 2019 – Apr 2022
   words:   38
 ────────────────────────────────────────────────────────────────────
-[Appnexus / Xandr | Director, Solution Consulting | Dec 2019 – Apr 2022] Designed and implemented the team’s operating model, introducing role specialisation, engagement frameworks, and clearer alignment with sales to improve scalability and consistency across enterprise clients.
+Role: Director, Solution Consulting at The Trade Desk / MediaMath ( to ), Section: Work experience. Context: Designed the team's engagement operating model, introducing vertical specialisation, scoping templates, and clearer sales alignment to improve consistency across enterprise accounts
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 012 | id=cv_a2_012 | strategy=A2 | bullet
   section: Work experience
-  company: Appnexus / Xandr
+  company: The Trade Desk / MediaMath
   title:   Director, Solution Consulting
   dates:   Dec 2019 – Apr 2022
-  words:   33
+  words:   35
 ────────────────────────────────────────────────────────────────────
-[Appnexus / Xandr | Director, Solution Consulting | Dec 2019 – Apr 2022] Partnered with sales, product, and engineering leadership to drive go-to-market strategy, ensuring successful rollout and adoption of new platform capabilities.
+Role: Director, Solution Consulting at The Trade Desk / MediaMath ( to ), Section: Work experience. Context: Expanded into retail media by launching a dedicated solutions track for commerce platforms, generating $4M in incremental pipeline
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 013 | id=cv_a2_013 | strategy=A2 | bullet
   section: Work experience
-  company: Appnexus / Xandr
+  company: The Trade Desk / MediaMath
   title:   Director, Solution Consulting
   dates:   Dec 2019 – Apr 2022
-  words:   31
+  words:   32
 ────────────────────────────────────────────────────────────────────
-[Appnexus / Xandr | Director, Solution Consulting | Dec 2019 – Apr 2022] Expanded into new client segments by launching services tailored to agency trading desks, generating $3M in new business.
+Role: Director, Solution Consulting at The Trade Desk / MediaMath ( to ), Section: Work experience. Context: Acted as senior technical stakeholder for strategic accounts, leading complex integrations and multi-quarter roadmap alignment
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 014 | id=cv_a2_014 | strategy=A2 | bullet
   section: Work experience
-  company: Appnexus / Xandr
+  company: The Trade Desk / MediaMath
   title:   Director, Solution Consulting
   dates:   Dec 2019 – Apr 2022
-  words:   31
+  words:   26
 ────────────────────────────────────────────────────────────────────
-[Appnexus / Xandr | Director, Solution Consulting | Dec 2019 – Apr 2022] Acted as senior technical stakeholder across key strategic accounts, leading complex integrations, product collaborations, and long-term partnership development.
+Role: Director, Solution Consulting at The Trade Desk / MediaMath ( to ), Section: Work experience. Context: Mentored consultants and team leads, driving several internal promotions
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 015 | id=cv_a2_015 | strategy=A2 | bullet
   section: Work experience
-  company: Appnexus / Xandr
-  title:   Director, Solution Consulting
-  dates:   Dec 2019 – Apr 2022
-  words:   27
+  company: The Trade Desk / MediaMath
+  title:   Solution Consultant & Senior Solution Consultant
+  dates:   2017 – 2019
+  words:   39
 ────────────────────────────────────────────────────────────────────
-[Appnexus / Xandr | Director, Solution Consulting | Dec 2019 – Apr 2022] Coached and mentored consultants and managers, strengthening the leadership bench and supporting internal progression.
+Role: Solution Consultant & Senior Solution Consultant at The Trade Desk / MediaMath ( to ), Section: Work experience. Context: Drove 22% year-on-year revenue growth across Tier 1 accounts ($18M combined) through custom API integrations and beta product programmes
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 016 | id=cv_a2_016 | strategy=A2 | bullet
   section: Work experience
-  company: Appnexus / Xandr
+  company: The Trade Desk / MediaMath
   title:   Solution Consultant & Senior Solution Consultant
   dates:   2017 – 2019
-  words:   38
+  words:   46
 ────────────────────────────────────────────────────────────────────
-[Appnexus / Xandr | Solution Consultant & Senior Solution Consultant | 2017 – 2019] Drove 20% year-on-year revenue growth across multiple Tier 1 accounts ($15M), deepening engagement through new product testing and API integrations to secure long-term budgets.
+Role: Solution Consultant & Senior Solution Consultant at The Trade Desk / MediaMath ( to ), Section: Work experience. Context: Co-built an internal reporting connector to bridge a product gap, adopted by 90+ client teams within three months and retaining approximately $600k of at-risk annual spend
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 017 | id=cv_a2_017 | strategy=A2 | bullet
   section: Work experience
-  company: Appnexus / Xandr
-  title:   Solution Consultant & Senior Solution Consultant
-  dates:   2017 – 2019
-  words:   42
+  company: Imagination Technologies
+  title:   Business Development Engineering Manager
+  dates:   2015 – 2016
+  words:   39
 ────────────────────────────────────────────────────────────────────
-[Appnexus / Xandr | Solution Consultant & Senior Solution Consultant | 2017 – 2019] Co-developed a Chrome extension to address a product feature gap, reaching 110+ client adoptions and retaining over $500k of at-risk revenue within the first two months of launch.
+Role: Business Development Engineering Manager at Imagination Technologies ( to ), Section: Work experience. Context: Gathered customer and partner inputs to inform the media IP roadmap, resulting in feature additions that secured multi-million licensing agreements across four new accounts
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 018 | id=cv_a2_018 | strategy=A2 | bullet
   section: Work experience
-  company: Imagination Technologies, PowerVR Graphics
-  dates:   2009 – 2016
-  words:   36
+  company: Imagination Technologies
+  title:   Business Development Engineering Manager
+  dates:   2015 – 2016
+  words:   32
 ────────────────────────────────────────────────────────────────────
-[Imagination Technologies, PowerVR Graphics | 2009 – 2016] Gathered industry and customer inputs to shape the GPU product roadmap, feeding back internally to adapt the existing product line leading to multi-million business across 3 new licensees.
+Role: Business Development Engineering Manager at Imagination Technologies ( to ), Section: Work experience. Context: Led technical scoping engagements with MediaTek and Renesas architecture teams, contributing to 12% of annual licensing revenue
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 019 | id=cv_a2_019 | strategy=A2 | bullet
   section: Work experience
-  company: Imagination Technologies, PowerVR Graphics
-  dates:   2009 – 2016
-  words:   27
+  company: Imagination Technologies
+  title:   Business Development Engineering Manager
+  dates:   2015 – 2016
+  words:   38
 ────────────────────────────────────────────────────────────────────
-[Imagination Technologies, PowerVR Graphics | 2009 – 2016] Led technical consulting with Marvell Semiconductor architecture teams, scoping SoC solutions and closing 10% of annual licensing revenue target.
+Role: Business Development Engineering Manager at Imagination Technologies ( to ), Section: Work experience. Context: Revamped the IP delivery and documentation process, doubling release cadence while supporting 5x growth in licensing revenue compared to the previous product generation
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 020 | id=cv_a2_020 | strategy=A2 | bullet
   section: Work experience
-  company: Imagination Technologies, PowerVR Graphics
-  dates:   2009 – 2016
-  words:   39
+  company: Application Specialist
+  words:   35
 ────────────────────────────────────────────────────────────────────
-[Imagination Technologies, PowerVR Graphics | 2009 – 2016] Led revamp of the Graphics IP delivery process covering product release, technical documentation and sales collateral doubling delivery frequency while supporting a 4x growth in licensing revenue over the previous generation.
+Role: at Application Specialist ( to ), Section: Work experience. Context: Gathered customer and partner inputs to inform the media IP roadmap, resulting in feature additions that secured multi-million licensing agreements across four new accounts
 
 ────────────────────────────────────────────────────────────────────
-CHUNK 021 | id=cv_a2_021 | strategy=A2 | role/section
+CHUNK 021 | id=cv_a2_021 | strategy=A2 | bullet
   section: Work experience
-  company: Imagination Technologies, PowerVR Graphics
-  dates:   2009 – 2016
+  company: Application Specialist
   words:   28
 ────────────────────────────────────────────────────────────────────
-[Imagination Technologies, PowerVR Graphics | 2009 – 2016] Progressive technical and BD roles in semiconductor IP, supporting Tier 1 partners across smartphone, TV, and automotive markets in APAC.
+Role: at Application Specialist ( to ), Section: Work experience. Context: Led technical scoping engagements with MediaTek and Renesas architecture teams, contributing to 12% of annual licensing revenue
 
 ────────────────────────────────────────────────────────────────────
-CHUNK 022 | id=cv_a2_022 | strategy=A2 | role/section
-  section: Education
-  dates:   2004 – 2006
-  words:   23
+CHUNK 022 | id=cv_a2_022 | strategy=A2 | bullet
+  section: Work experience
+  company: Application Specialist
+  words:   34
 ────────────────────────────────────────────────────────────────────
-[Education] MSc VLSI Design, University of Westminster (UK)
-Bachelor of electronic engineering, ESTE (France)
-Exchange senior engineering student at Harvey Mudd College (CA)
+Role: at Application Specialist ( to ), Section: Work experience. Context: Revamped the IP delivery and documentation process, doubling release cadence while supporting 5x growth in licensing revenue compared to the previous product generation
 
 ────────────────────────────────────────────────────────────────────
 CHUNK 023 | id=cv_a2_023 | strategy=A2 | role/section
+  section: Education
+  dates:   2004 – 2006
+  words:   21
+────────────────────────────────────────────────────────────────────
+[Education] MSc VLSI Design, University of Bristol (UK)
+Bachelor of electronic engineering, INSA (France)
+Exchange senior engineering student University of Californa
+
+────────────────────────────────────────────────────────────────────
+CHUNK 024 | id=cv_a2_024 | strategy=A2 | role/section
   section: Languages
   words:   6
 ────────────────────────────────────────────────────────────────────
 [Languages] Bilingual in French and English
 
 ────────────────────────────────────────────────────────────────────
-CHUNK 024 | id=cv_a2_024 | strategy=A2 | role/section
+CHUNK 025 | id=cv_a2_025 | strategy=A2 | role/section
   section: Interests
   words:   13
 ────────────────────────────────────────────────────────────────────
 [Interests] Passion for craft and wood working, hand making furniture, yoga and capoeira
 
-Strategy A2: 25 chunks | avg 33 words | min 6 | max 82
+Strategy A2: 26 chunks | avg 34 words | min 6 | max 75
 
 ════════════════════════════════════════════════════════════════════
 SUMMARY
 ════════════════════════════════════════════════════════════════════
-Strategy A: 11 chunks | avg 61 words | min 6 | max 140
-Strategy A2: 25 chunks | avg 33 words | min 6 | max 82
+Strategy A: 11 chunks | avg 59 words | min 6 | max 108
+Strategy A2: 26 chunks | avg 34 words | min 6 | max 75
 
 Do the chunks look right? Proceed to ingestion? (y/n): 
 (no interactive input — review the chunks above, then run ingest.py when ready)

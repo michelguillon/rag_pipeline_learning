@@ -25,9 +25,7 @@ import re
 from collections import Counter
 from pathlib import Path
 
-from docx import Document
-
-from docx_parser import extract_paragraphs
+from loaders import load_docx
 
 CONFIG_PATH = "config.json"
 
@@ -47,15 +45,15 @@ def load_config(path=CONFIG_PATH):
 
 def body_size_of(records):
     """Modal font size among non-bullet paragraphs — the 'body text' size."""
-    sizes = Counter(r["size"] for r in records
-                    if not r["is_list"] and r["size"] is not None)
+    sizes = Counter(r.rendered_size for r in records
+                    if not r.has_num_pr and r.rendered_size is not None)
     return sizes.most_common(1)[0][0] if sizes else None
 
 
 def top_heading_style(records):
     """The highest-level heading style present ('Heading 1' before 'Heading 3')."""
-    headings = sorted({r["style"] for r in records
-                       if r["style"].startswith("Heading")})
+    headings = sorted({r.style_name for r in records
+                       if r.style_name.startswith("Heading")})
     return headings[0] if headings else None
 
 
@@ -73,14 +71,14 @@ def decode_role(rec, section_style, body_size):
       4. any heading style    -> title    (e.g. Heading 3 at body size)
       5. otherwise            -> body
     """
-    if rec["is_list"]:
+    if rec.has_num_pr:
         return "bullet"
-    if section_style and rec["style"] == section_style:
+    if section_style and rec.style_name == section_style:
         return "section"
-    if (body_size is not None and rec["size"] is not None
-            and rec["size"] > body_size):
+    if (body_size is not None and rec.rendered_size is not None
+            and rec.rendered_size > body_size):
         return "header"
-    if rec["style"].startswith("Heading"):
+    if rec.style_name.startswith("Heading"):
         return "title"
     return "body"
 
@@ -132,7 +130,7 @@ def build_units(records, section_style, body_size):
 
     for rec in records:
         role = decode_role(rec, section_style, body_size)
-        text, date = rec["text"], rec.get("date", "")
+        text, date = rec.text, rec.date
 
         if role == "section":
             section = text
@@ -308,7 +306,7 @@ def all_chunks(docx_path, config=None):
     One document read feeds both — A and A2 are two views of the same units.
     """
     config = config or load_config()
-    records = extract_paragraphs(Document(str(docx_path)))
+    records = load_docx(docx_path)
     section_style = config.get("section_signal") or top_heading_style(records)
     body_size = body_size_of(records)
     units = build_units(records, section_style, body_size)

@@ -15,31 +15,34 @@ user to *understand* every architectural decision. When implementing:
 
 | File | Role |
 |------|------|
-| [rag_pipeline_spec.md](rag_pipeline_spec.md) | **The spec.** Every architectural decision + ordered implementation steps. Defer to this. |
+| [SPEC_PHASE2.md](SPEC_PHASE2.md) | **Active spec — Phase 2.** Config-driven chunker, common paragraph model, PDF loader. Defer to this for current work. |
+| [rag_pipeline_spec.md](rag_pipeline_spec.md) | Phase 1 spec (Week 1, complete) — architecture decisions + history. |
 | [LEARNING_NOTES.md](LEARNING_NOTES.md) | Running record of concepts learned. Keep it updated as we progress. |
 
 If code and spec disagree, the spec wins — or flag the conflict before proceeding.
 
 ## Repo state
 
-**All 6 phases complete** — the pipeline is built, run end-to-end, and the
-README is written. The 5 pipeline scripts sit over 3 shared modules:
-`docx_parser.py` (.docx → records), `chunker.py` (records → chunks),
-`mistral_helpers.py` (client + retry). The old single-file prototype was
-deleted; [mistral_basics.py](mistral_basics.py) is kept as the Hours 1–2
-learning file.
+**Phase 1 (Week 1) is complete and the repo is public**
+(github.com/michelguillon/rag_pipeline_learning). The pipeline is built, run
+end-to-end, README written. 5 pipeline scripts over 3 shared modules
+(`docx_parser.py`, `chunker.py`, `mistral_helpers.py`); `mistral_basics.py`
+kept as the Hours 1–2 learning file.
 
-A 3-CV cross-test (cv.docx + two friends' CVs) confirmed the decode is
-hardcoded to cv.docx's structure — it collapses on differently-authored CVs.
-**Post-Week-1 priority:** make `chunker.py`'s decode config-driven (signals
-flow from `analyse.py` → `config.json` → `chunker.py`) so the pipeline works on
-any CV. See `LEARNING_NOTES.md` "Cross-CV test".
+**Phase 2 is the active work — spec: [SPEC_PHASE2.md](SPEC_PHASE2.md).** It
+closes the gap a 3-CV cross-test exposed: `analyse.py`'s profiler generalises,
+but `chunker.py`'s decode is hardcoded to cv.docx's structure and collapses on
+other CVs. Phase 2, in priority order: (1) **config-driven chunker** — decode
+rules flow from `config.json`; (2) cross-document validation; (3) PDF loader
+(stretch). Phase 2 also **restructures the repo** (`docs/`, `loaders/`,
+`models/`) — so the file map below is the current Phase-1 layout and changes
+early in Phase 2.
 
-Note: `config.json` and `chroma_db/` are regenerable per-document. `config.json`
-is kept on the canonical `data/cv.docx`; `chroma_db/` may hold whatever CV was
-last ingested — rebuild with `ingest.py` as needed.
+Data note: only `data/sample_cv.docx` (fake) is committed/public; the real CV
+and friends' CVs stay git-ignored. `config.json` / `chroma_db/` are regenerable
+per-document.
 
-## Target architecture (per spec)
+## Current file layout (Phase 1 — Phase 2 reorganises this)
 
 ```
 analyse.py        → inspect docx structure, ask Mistral to recommend chunking → config.json
@@ -85,7 +88,7 @@ This matches the style of [mistral_basics.py](mistral_basics.py) (the old
 to the spec's architecture, it must keep — or exceed — that level of annotation.
 Concepts worked through also get a short entry in [LEARNING_NOTES.md](LEARNING_NOTES.md).
 
-## Running (once Docker scaffold exists)
+## Running
 
 ```powershell
 docker compose build
@@ -93,24 +96,24 @@ docker compose run pipeline python analyse.py data/cv.docx
 docker compose run pipeline bash      # interactive shell
 ```
 
-## Project phases — all complete
+## Project status
 
-- ✅ **Phase 1 — Environment setup**: Docker, requirements, scaffold.
-- ✅ **Phase 2 — `analyse.py`**: docx profiler + Mistral chunking recommendation.
-- ✅ **Phase 3 — `chunker.py` + `review_chunks.py`** (+ `docx_parser.py`).
-- ✅ **Phase 4 — `ingest.py`**: embed + store in 4 ChromaDB collections.
-- ✅ **Phase 5 — `query.py`**: retrieval-augmented Q&A.
-- ✅ **Phase 6 — `stress_test.py`**: 112-cell experiment matrix + findings.
-- ✅ **README** written against real findings.
+**Phase 1 (Week 1) — complete.** Six implementation steps, all done:
+environment/Docker · `analyse.py` · `chunker.py` + `review_chunks.py` ·
+`ingest.py` · `query.py` · `stress_test.py` (112-cell matrix) · README.
+(These were labelled "Phase 1–6" in earlier notes — they are *steps* of
+Phase 1, not to be confused with project Phase 2 below.)
 
-Open items: the README's "before making public" checklist (swap real CV for a
-sample, audit `outputs/` for real CV text); the small-vs-large model comparison
-was skipped on the free tier.
+**Phase 2 — not started.** See [SPEC_PHASE2.md](SPEC_PHASE2.md): config-driven
+chunker, a common `Paragraph` model + `loaders/`, cross-document validation,
+PDF loader (stretch).
+
+Carried-over note: the small-vs-large model stress comparison was skipped on
+the free tier.
 
 ## A note on hierarchical CLAUDE.md
 
-The project is currently a **flat layout** — all scripts at the repo root, with
-`data/`, `outputs/`, `chroma_db/` holding data only (no code). A nested CLAUDE.md
-adds value only when a subdirectory has enough of its own context to be worth
-loading separately. That is not the case yet. Revisit if the project grows
-(e.g. a `tests/` suite or a multi-document module gets its own conventions).
+Phase 1 was a flat layout. Phase 2 adds `docs/`, `loaders/`, `models/` — all
+small, single-purpose directories. A nested CLAUDE.md earns its place only when
+a subdirectory carries enough of its own context to load separately; that is
+still not the case. Revisit if any of those directories grows its own conventions.

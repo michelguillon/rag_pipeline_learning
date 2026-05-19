@@ -29,9 +29,15 @@ README is written. The 5 pipeline scripts sit over 3 shared modules:
 deleted; [mistral_basics.py](mistral_basics.py) is kept as the Hours 1–2
 learning file.
 
-Post-Week-1 work the user wants (not started): generalise `analyse.py` beyond
-the CV into a multi-document-type tool — see `LEARNING_NOTES.md` "Phase 3 — How
-far the pipeline generalises".
+A 3-CV cross-test (cv.docx + two friends' CVs) confirmed the decode is
+hardcoded to cv.docx's structure — it collapses on differently-authored CVs.
+**Post-Week-1 priority:** make `chunker.py`'s decode config-driven (signals
+flow from `analyse.py` → `config.json` → `chunker.py`) so the pipeline works on
+any CV. See `LEARNING_NOTES.md` "Cross-CV test".
+
+Note: `config.json` and `chroma_db/` are regenerable per-document. `config.json`
+is kept on the canonical `data/cv.docx`; `chroma_db/` may hold whatever CV was
+last ingested — rebuild with `ingest.py` as needed.
 
 ## Target architecture (per spec)
 

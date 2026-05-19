@@ -402,7 +402,51 @@ metric tradeoffs stop being academic.
 
 ---
 
-## Next step
+## Cross-CV test — three real CVs, three different documents
 
-Project build complete. Remaining: the README — written last, against these
-real findings (spec README structure).
+Ran the pipeline on two more CVs (friends') to test generalisation — a clean,
+concrete confirmation of the Phase 3 prediction.
+
+| CV | Structure | Heading styles | Dates | Strategy-A result |
+|----|-----------|---------------|-------|-------------------|
+| cv.docx (built for) | 1 table, merged-cell rows | Heading 1/3/4 | separate column | 11 clean role chunks |
+| CV #2 | 1 table | none — uses the `Title` style | inline on the title line | 3 chunks, one of 874 words |
+| CV #3 | no table, plain paragraphs | none — bold + font size | inline | 4 chunks, one of 749 words |
+
+**What generalised.** Bullet detection by `numPr` worked on all three (18 / 35
+/ 24 bullets) — Strategy A2 ran everywhere. And `analyse.py`'s profiler +
+consistency report described all three correctly; for both new CVs it
+explicitly flagged the cause of failure — *"paragraphs larger than body text
+but using NO heading style — a style-only parser would miss these as
+boundaries."* The analysis layer is genuinely document-agnostic; it even
+diagnosed its own downstream failure.
+
+**What did not generalise.** Sections, companies, job titles and dates are
+encoded a different way in every CV — Heading styles vs the `Title` style vs
+bold+size; a date column vs dates inline. `chunker.py`'s decode is hardcoded to
+the first CV's conventions, so on the other two it found no role boundaries and
+Strategy A collapsed into whole-CV mega-chunks.
+
+**The failure mode is the dangerous one.** Nothing crashed. The pipeline
+produced chunks, embedded them, stored them — all "successfully". A 749-word
+"chunk" that is really an entire CV would quietly wreck retrieval. Running and
+being wrong beats crashing only in appearance.
+
+**Ingestion was never the risk.** `ingest.py` embedded and stored every CV's
+chunks without trouble — it is content-agnostic. The fragile step is chunking,
+upstream of it.
+
+**The fix shape (post-Week-1).** `analyse.py` already detects enough to chunk
+any of these CVs — it just is not believed. The decode signals (what marks a
+section / company / title / date) must travel in `config.json`, derived
+per-document by `analyse.py` + the human, and be consumed by `chunker.py` —
+instead of being hardcoded. That is the concrete shape of the "generalise the
+analyser" work.
+
+---
+
+## Status
+
+Week 1 build complete (6 phases + README). Cross-CV test done — it defined the
+post-Week-1 priority: make `chunker.py`'s decode config-driven so the pipeline
+works on any CV, not just the one it was built for.

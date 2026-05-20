@@ -9,8 +9,8 @@
     { "signal": "style==Heading 3", "role": "job_title" }
   ],
   "collections": {
-    "A":  ["cv_role_cosine",   "cv_role_l2"],
-    "A2": ["cv_bullet_cosine", "cv_bullet_l2"]
+    "A":  ["cv1_role_cosine",   "cv1_role_l2"],
+    "A2": ["cv1_bullet_cosine", "cv1_bullet_l2"]
   },
   "metadata_fields": ["company", "job_title", "dates", "section_name"],
   "prefix_template": "Role: {job_title} at {company} ({dates}), Section: {section_name}. Context: ",

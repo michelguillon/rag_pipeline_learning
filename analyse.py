@@ -418,6 +418,10 @@ def main():
     parser.add_argument("document", help="path to the .docx file")
     parser.add_argument("--yes", action="store_true",
                         help="write config.json without the interactive prompt")
+    parser.add_argument("--profile-only", action="store_true",
+                        help="print the structural profile and exit; do not "
+                             "call Mistral and do not write config.json. "
+                             "Useful for hand-authoring fingerprint_rules.")
     parser.add_argument("--trace", metavar="PATH", nargs="?",
                         const="outputs/analyse_trace.txt", default=None,
                         help="write a full trace (analysis + the exact prompt "
@@ -441,6 +445,15 @@ def main():
     analysis_text = format_analysis(records, profile, flags,
                                     sections, section_style, estimates)
     print("\n" + analysis_text)
+
+    # --profile-only: print the structural profile and stop. Useful for the
+    # human-authored config path — the same workflow analyse.py + Mistral runs,
+    # minus the Mistral call (and the API spend). Also useful for the broader
+    # analyser-generalisation goal: profile any document, no chunking required.
+    if args.profile_only:
+        print("\n(--profile-only: skipping Mistral recommendation and config "
+              "write. Author fingerprint_rules from the profile above.)")
+        return
 
     print(f"\nAsking {RECOMMEND_MODEL} for a chunking recommendation...")
     client = get_client()

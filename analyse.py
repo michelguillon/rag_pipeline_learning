@@ -24,7 +24,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 import chunker
-from loaders import load_docx
+from loaders import load
 from mistral_helpers import get_client, call_with_retry
 from models import Paragraph
 
@@ -41,9 +41,10 @@ COLLECTIONS = {
 # one place large earns its cost — and it is a single call, so spend is trivial.
 RECOMMEND_MODEL = "mistral-large-latest"
 
-# Document loading (load_docx) lives in loaders/docx_loader.py — it returns the
-# common Paragraph model (models/paragraph.py), shared with chunker.py so the
-# preview and the ingested chunks come from an identical reading of the document.
+# Document loading uses the loaders.load(path) dispatcher — it picks
+# load_docx / load_pdf by extension and returns the common Paragraph model
+# (models/paragraph.py), shared with chunker.py so the preview and the
+# ingested chunks come from an identical reading of the document.
 
 
 # ──────────────────────────────────────────────
@@ -83,7 +84,10 @@ def consistency_report(records):
     flags = []
 
     # C1 — bullets under more than one paragraph style
-    bullet_styles = sorted({r.style_name for r in records if r.has_num_pr})
+    # PDF paragraphs carry style_name=None (no style system). Filter those out
+    # of the bullet-styles set — sorted() chokes on a None mixed with strings.
+    bullet_styles = sorted({r.style_name for r in records
+                            if r.has_num_pr and r.style_name is not None})
     if len(bullet_styles) > 1:
         flags.append(
             f"Bullets appear under {len(bullet_styles)} different styles "
@@ -100,7 +104,7 @@ def consistency_report(records):
     if body_size is not None:
         prominent = [r for r in records
                      if not r.has_num_pr
-                     and not r.style_name.startswith("Heading")
+                     and not (r.style_name or "").startswith("Heading")
                      and r.rendered_size is not None
                      and r.rendered_size > body_size]
         if prominent:
@@ -113,7 +117,7 @@ def consistency_report(records):
 
     # C3 — heading styles overridden by a direct font size
     overridden = [r for r in records
-                  if r.style_name.startswith("Heading") and r.override]
+                  if (r.style_name or "").startswith("Heading") and r.override]
     if overridden:
         flags.append(
             f"{len(overridden)} heading-styled paragraph(s) carry a direct "
@@ -130,7 +134,7 @@ def detect_sections(records):
     bullets, words.
     """
     heading_styles = sorted({r.style_name for r in records
-                             if r.style_name.startswith("Heading")})
+                             if (r.style_name or "").startswith("Heading")})
     if not heading_styles:
         return [], None
     section_style = heading_styles[0]  # 'Heading 1' sorts before 'Heading 3'
@@ -162,7 +166,7 @@ def estimate_chunks(records, sections):
     # A ≈ one chunk per section + one per sub-heading (heading styles below
     # the top-level section style — i.e. roles/sub-sections)
     heading_styles = sorted({r.style_name for r in records
-                             if r.style_name.startswith("Heading")})
+                             if (r.style_name or "").startswith("Heading")})
     sub_styles = set(heading_styles[1:])
     n_sub = sum(1 for r in records if r.style_name in sub_styles)
     a = len(sections) + n_sub
@@ -239,7 +243,11 @@ the most specific catches fire first, and trust ordering to handle the rest.
 
 Use the fingerprint-profile counts and samples below to pick signals that
 cleanly separate the roles in THIS document. Prefer the signal that is most
-consistent for a given role across its instances."""
+consistent for a given role across its instances.
+
+NOTE on PDFs: PDFs have no paragraph style system; every paragraph's
+`style_name` is None, so `style==<name>` rules will never fire. For a PDF
+profile, lean on `rendered_size==<n>`, `is_bold`, and `has_numPr` only."""
 
 
 def ask_mistral(client, profile, flags, sections, estimates):
@@ -315,7 +323,8 @@ def format_analysis(records, profile, flags, sections, section_style, estimates)
                f"{'list':>4}  sample")
     for p in profile:
         size = "-" if p["size"] is None else f"{p['size']:g}"
-        out.append(f"  {p['count']:>5}  {p['style'][:18]:18s} {size:>6} "
+        style_str = (p["style"] or "-")[:18]   # PDF: style is None
+        out.append(f"  {p['count']:>5}  {style_str:18s} {size:>6} "
                    f"{int(p['bold']):>4} {int(p['is_list']):>4}  {p['sample'][:34]}")
 
     out.append(f"\nCONSISTENCY REPORT  ({len(flags)} flag(s))")
@@ -434,7 +443,7 @@ def main():
         sys.exit(f"Document not found: {path}")
 
     print(f"\nAnalysing: {path}")
-    records = load_docx(path)
+    records = load(path)
     if not records:
         sys.exit("No content found in the document.")
 

@@ -52,18 +52,24 @@ QUERY_FORMAT = "labelled"                   # show [Source: ...] in the context
 # The three test documents, in the order they appear in comparison.md.
 # `phase1_chunks` records the Phase 1 cross-CV failure — the bar Phase 2
 # clears.
+# cv1 is the public fake CV (committed). cv2 and cv3 reference the private
+# test CVs the cross-CV failure was found on — those .docx files are
+# gitignored, so a fresh clone cannot reproduce the cv2/cv3 rows without
+# supplying its own documents. The structural FINDINGS (chunk counts,
+# decode rule diffs) live in comparison.md, also gitignored — the public
+# evidence of Phase 2 lives in the README.
 CVS = [
     {"tag": "cv1", "label": "sample_cv.docx",
-     "doc": "data/cv.docx",
+     "doc": "data/sample_cv.docx",
      "config": "config_cv1.json",
      "structure": "Heading 1 + table, mixed-size headings",
      "phase1_chunks": "11 role / 25 bullet (worked)"},
-    {"tag": "cv2", "label": "Gautham CV",
+    {"tag": "cv2", "label": "private CV #2",
      "doc": "data/Gautham_Dilip_Kripalani-CV2024_v4.docx",
      "config": "config_cv2.json",
      "structure": "No heading styles at all — sizes + bold only",
      "phase1_chunks": "3 mega-chunks (failed)"},
-    {"tag": "cv3", "label": "Geoffroy CV",
+    {"tag": "cv3", "label": "private CV #3",
      "doc": "data/2021_GdeChateauvieux_LCV.docx",
      "config": "config_cv3.json",
      "structure": "Table-based, 'Title' paragraph style as company signal",

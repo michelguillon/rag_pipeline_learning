@@ -24,7 +24,7 @@ import json
 import re
 from pathlib import Path
 
-from loaders import load_docx
+from loaders import load
 
 CONFIG_PATH = "config.json"
 
@@ -345,10 +345,11 @@ def chunks_strategy_a2(units, prefix_template):
     return chunks
 
 
-def all_chunks(docx_path, config=None):
+def all_chunks(path, config=None):
     """Chunk a document under BOTH strategies. Returns {'A': [...], 'A2': [...]}.
 
     One document read feeds both — A and A2 are two views of the same units.
+    `path` is any file the loaders/ package can dispatch on (.docx or .pdf).
     """
     config = config or load_config()
     rules = config.get("fingerprint_rules")
@@ -358,7 +359,7 @@ def all_chunks(docx_path, config=None):
             "generate them. A config-driven chunker cannot decode without "
             "rules, and silently producing whole-document mega-chunks is the "
             "exact failure mode Phase 2 exists to fix. Refusing to chunk.")
-    records = load_docx(docx_path)
+    records = load(path)
     units = build_units(records, rules)
     return {
         "A": chunks_strategy_a(units),

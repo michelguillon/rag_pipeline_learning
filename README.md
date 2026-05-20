@@ -4,10 +4,11 @@ A retrieval-augmented question-answering system, built from scratch: it ingests
 a CV, embeds it into a vector store, retrieves the relevant chunks for a
 question, and has Mistral generate an answer grounded **only** in those chunks.
 
-Built as a Week-1 AI learning project. The point was not just working code —
+Built as an AI learning project. The point was not just working code —
 it was to understand and document *every* architectural decision. The reasoning
-lives in [rag_pipeline_spec.md](rag_pipeline_spec.md) (the spec) and
-[LEARNING_NOTES.md](LEARNING_NOTES.md) (what each phase taught).
+lives in [docs/SPEC.md](docs/SPEC.md) (Phase 1 spec),
+[docs/SPEC_PHASE2.md](docs/SPEC_PHASE2.md) (Phase 2 spec), and
+[docs/LEARNING_NOTES.md](docs/LEARNING_NOTES.md) (what each phase taught).
 
 ---
 
@@ -34,8 +35,11 @@ modules:
 
 | Module | Role |
 |--------|------|
-| `docx_parser.py` | `.docx` → paragraph records (style, size, list, dates) |
-| `chunker.py` | decode rule → chunks, for strategy A and A2 |
+| `models/paragraph.py` | common `Paragraph` dataclass — every loader's output |
+| `loaders/docx_loader.py` | `.docx` → `list[Paragraph]` |
+| `loaders/pdf_loader.py` | `.pdf` → `list[Paragraph]` (pdfplumber) |
+| `loaders/__init__.py` | `load(path)` dispatcher — picks loader by extension |
+| `chunker.py` | config-driven decode (signal grammar, ordered rules) → chunks |
 | `mistral_helpers.py` | Mistral client + `call_with_retry()` |
 
 ---
@@ -74,20 +78,27 @@ docker compose run pipeline python ingest.py data/sample_cv.docx
 
 # 4. Ask a question
 docker compose run pipeline python query.py "What was his most recent role?" `
-  --collection cv_role_cosine --top-k 3 --format labelled
+  --collection cv1_bullet_cosine --top-k 3 --format labelled
 
 # 5. Run the full experiment matrix (resumable)
 docker compose run pipeline python stress_test.py
+
+# 6. Phase 2 cross-document validation (3 CVs, fixed question set)
+docker compose run pipeline python validate.py
 ```
 
 `analyse.py --trace` writes the full prompt + Mistral response to `outputs/`.
-`stress_test.py` checkpoints after every cell — re-run it to resume.
+`analyse.py --profile-only` prints the fingerprint profile without calling
+Mistral — useful for hand-authoring rules. `stress_test.py` checkpoints after
+every cell — re-run it to resume. `validate.py --report-only` re-renders
+`outputs/phase2_validation/comparison.md` from `results.json` without
+re-spending API.
 
 ---
 
 ## Architectural decisions
 
-Full reasoning is in [rag_pipeline_spec.md](rag_pipeline_spec.md). The load-bearing ones:
+Full reasoning is in [docs/SPEC.md](docs/SPEC.md) and [docs/SPEC_PHASE2.md](docs/SPEC_PHASE2.md). The load-bearing ones:
 
 - **Semantic chunking, not fixed-size.** Each chunk is a structural unit (a
   role, or a bullet) — no chunk-size or overlap parameter. Two strategies are
@@ -96,6 +107,14 @@ Full reasoning is in [rag_pipeline_spec.md](rag_pipeline_spec.md). The load-bear
 - **Profile the document, don't assume it.** Real Word files encode hierarchy
   inconsistently — `analyse.py` enumerates formatting fingerprints and flags
   inconsistency rather than hardcoding "Heading 3 = company".
+- **Config-driven decode (Phase 2).** `chunker.py` carries no document-specific
+  logic; it reads an ordered `fingerprint_rules` list from per-CV `config.json`
+  and executes it. Four signals (`has_numPr`, `is_bold`, `rendered_size==n`,
+  `style==name`) and a no-`eval()` parser. Order replaces compound conditions
+  (decision list, not boolean expression tree).
+- **Common `Paragraph` model + format dispatcher (Phase 2).** All loaders emit
+  the same dataclass; `chunker.py` knows nothing about `.docx` vs `.pdf`.
+  Adding a new format is one new file in `loaders/`.
 - **ChromaDB, persistent**, 4 collections (chunk strategy × cosine/L2 metric).
 - **`mistral-embed`** for documents and queries — the one un-swappable choice,
   because vectors from different embedding models live in incompatible spaces;
@@ -133,7 +152,52 @@ mattered more than the *tuning*. Tuning earns its keep at scale.
 the boundary. The fingerprint profiler described both correctly and diagnosed
 its own downstream failures. The chunker, hardcoded to the first CV's
 conventions, collapsed silently — producing whole-CV mega-chunks with no error.
-The profiler generalises. The chunker doesn't, yet.
+The profiler generalised. The chunker didn't, until Phase 2 closed the loop ↓
+
+---
+
+## Cross-document validation (Phase 2)
+
+The Phase 1 cross-CV failure was the explicit motivation for Phase 2. The
+chunker now reads its decode rules from `config_cv*.json` (an ordered list of
+`fingerprint_rules` under a 4-signal no-`eval()` grammar) rather than carrying
+them in code. Same chunker, three structurally-different CVs — only the
+config changes:
+
+| CV | Structure | Phase 1 result | Phase 2 result (A / A2) |
+|----|-----------|----------------|--------------------------|
+| `sample_cv.docx` | Heading 1 + table, mixed-size headings | ✅ 11 / 25 | ✅ **11 / 25** unchanged |
+| CV #2 (private) | No heading styles at all — sizes + bold only | ❌ 3 mega-chunks | ✅ **6 / 31** |
+| CV #3 (private) | Table-based, `Title` paragraph style as company signal | ❌ 4 mega-chunks | ✅ **10 / 36** |
+
+**Decode rules diff (the only thing that changes between runs):**
+
+```
+cv1                                    cv2 (no heading styles)         cv3 (Title-style)
+  has_numPr        -> bullet            has_numPr       -> bullet       has_numPr        -> bullet
+  style==Heading 1 -> section_header    rendered_size==12 -> section    style==Title     -> company
+  rendered_size==14 -> company          rendered_size==20 -> section    rendered_size==22 -> section
+  rendered_size==18 -> company          is_bold         -> job_title    rendered_size==16 -> section
+  style==Heading 3 -> job_title                                         is_bold          -> company
+```
+
+A fixed 7-question set (the spec's 5 factual/synthesis/hallucination questions
++ a date-range and a multi-company synthesis question) runs against each CV
+under identical settings (A2, cosine, top-3, `mistral-small`, labelled context).
+**All three CVs correctly refused the hallucination question** (the "current
+salary" probe). Answerable-question refusals are reported separately as
+*retrieval gaps* — a useful diagnostic, distinct from hallucination.
+
+**Bonus — PDF parity.** A PDF rendering of the same `sample_cv.docx` content
+loaded through `loaders/pdf_loader.py` (pdfplumber) produced **11 / 29 chunks**
+(vs 11 / 28 for the `.docx`) with identical bullet recovery (21 / 21). The
+chunker code was unchanged; only the loader differs. That is the "format-
+agnostic pipeline" claim demonstrated end-to-end.
+
+Full per-question results live in `outputs/phase2_validation/comparison.md`
+(git-ignored — contains real CV text). Findings, decision-list reasoning, and
+the Mistral compound-signal anecdote are in
+[docs/LEARNING_NOTES.md](docs/LEARNING_NOTES.md).
 
 ---
 
@@ -147,8 +211,12 @@ markup are two different things, and a parser that assumes otherwise
 fails quietly. I rebuilt the analysis step as a fingerprint profiler
 that discovers structure rather than assuming it — and when I tested
 on two other CVs, the profiler correctly described both and diagnosed
-its own downstream failures. The chunker, which was still hardcoded,
-collapsed. That gap is the next build.
+its own downstream failures. The chunker, still hardcoded at that
+point, collapsed. Phase 2 closed that loop: the decode rules now travel
+in `config.json` as an ordered list of single-signal rules under a tiny
+no-`eval()` grammar, derived per-document by `analyse.py` + a human.
+Three structurally-different CVs validate cleanly through the same
+chunker — only `fingerprint_rules` changes.
 
 The 112-cell stress test confirmed something less obvious: on a small,
 clean corpus, the tuning knobs — chunk strategy, distance metric,
@@ -160,8 +228,13 @@ on failure 92. These aren't glamorous decisions. They're the ones that
 determine whether a RAG system works on a customer's actual documents,
 not just the clean sample it was demoed on.
 
-The tuning earns its keep at scale and with noisier retrieval — which
-is exactly where this is going next.
+The Phase 2 work added one more lesson worth keeping: when you give an
+LLM a small grammar and tell it to honour the grammar, it may quietly
+refuse — Mistral persistently produced compound `&&` signals across
+three prompt iterations despite explicit "FORBIDDEN" language. The
+validation gate caught every attempt before any bad config landed on
+disk. The "Mistral proposes, human approves" loop is load-bearing, not
+ceremonial.
 
 ---
 
@@ -169,10 +242,10 @@ is exactly where this is going next.
 
 | Area | This project | Production |
 |------|-------------|------------|
-| Chunking | Hardcoded decode rules | Config-driven, derived per-document by `analyse.py` |
+| Chunking | ✅ Config-driven decode (Phase 2), derived per-document by `analyse.py` + human approval | — |
+| Format support | ✅ `.docx` + `.pdf` via a common `Paragraph` model and a `load(path)` dispatcher (Phase 2) | Pluggable chunking-**strategy** registry per document class (CV vs RFP vs report) — the loader story is done; the strategy story remains |
 | Vector store | ChromaDB (local) | Pinecone / pgvector when corpus > ~1M vectors or multi-tenant |
 | API tier | Mistral free tier (rate-limited) | Paid tier; batch embedding |
-| Document types | Single CV (`.docx`) | Format-agnostic loader + pluggable chunking-strategy registry per document class |
-| Metadata | Attached, lightly used | Metadata-filtered retrieval (by company / date / tenant) — the real scaling lever |
+| Corpus | Single document per ingestion run | Multi-document corpus with metadata-filtered retrieval (by company / date / tenant) — the real scaling lever |
 | Retrieval | Semantic only | Hybrid semantic + BM25 keyword |
-| Evaluation | Token cost, similarity, hallucination refusal | + Automated answer-quality scoring |
+| Evaluation | Token cost, similarity, hallucination refusal, retrieval-gap rate | + Automated answer-quality scoring |

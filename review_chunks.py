@@ -11,7 +11,7 @@ human review. No embedding, no storage, no API calls, no spend.
 WHY THIS STEP EXISTS: embedding costs tokens and writes to ChromaDB. Inspecting
 the chunks first means bad boundaries are caught before any spend — the
 equivalent of a data-validation gate before a batch job. Chunk *size* is an
-observed outcome reviewed here, never an input (see LEARNING_NOTES.md, Phase 3).
+observed outcome reviewed here, never an input (see docs/LEARNING_NOTES.md, Phase 3).
 
 review_chunks.py and ingest.py both build chunks through chunker.py, so what is
 previewed here is exactly what gets ingested.

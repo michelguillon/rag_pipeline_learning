@@ -445,8 +445,304 @@ analyser" work.
 
 ---
 
+---
+
+## Phase 2 — Config-driven decode: implicit vs explicit, not hardcoded vs adaptive
+
+Phase 2's headline was "make the chunker config-driven". The actual framing
+worth keeping is subtler than the headline.
+
+**The Phase 1 chunker was not literally hardcoded.** It computed two values
+at runtime — the document's modal body size and its top heading style — and
+used them in a decision tree (`size > body_size` → company header,
+`style.startswith("Heading")` → title, etc.). It *adapted* per document. So the
+critique "it's hardcoded" is too easy.
+
+**The real critique: the decode rules were implicit and code-resident.** They
+were never *declared*, *inspectable*, or *per-document-overridable*. `analyse.py`
+profiled the document and emitted a `config.json` describing its structure,
+but `chunker.py` mostly ignored that file and re-derived its own logic from
+heuristics. The cross-CV failure was not because heuristics fail in principle —
+it was because nothing could override them when they did.
+
+**Phase 2 closes the loop by moving the decode rules to the config file.**
+`analyse.py` proposes an ordered `fingerprint_rules` list, a human reviews +
+approves, `chunker.py` simply executes. Same code, three structurally-
+different CVs, only the config changes. The architectural shift is from
+"implicit code that adapts via heuristics" to "explicit config the code
+trusts". Both can be correct on the document they were tuned for; only the
+explicit form survives contact with a documented client conversation about
+*why* the system classifies what it classifies.
+
+---
+
+## Phase 2 — Decision lists vs expression trees: a grammar choice that pays for itself
+
+The signal grammar is deliberately tiny. Four single-condition signals:
+`has_numPr`, `is_bold`, `rendered_size==<n>`, `style==<name>`. No `&&`, no
+`||`, no negation. The chunker rejects compound signals at the parser.
+
+That looks restrictive — and the obvious instinct (Mistral's, and most
+engineers') is to want `rendered_size==14 && is_bold` to disambiguate "this
+14pt thing that's also bold is a company; that 14pt thing without bold is
+something else". The grammar deliberately doesn't allow it. Why?
+
+**The grammar choice isn't really expression-tree-vs-list of conditions.
+It's ordered-list-with-first-match-wins vs everything-is-a-predicate.** A
+decision list — firewall rules, CSS specificity, legal precedent —
+discharges its ambiguity through ORDER, not through conjunction. If a
+paragraph satisfies two signals at once, the rule that should win goes
+first. `rendered_size==14 -> company` placed BEFORE
+`style==Heading 3 -> job_title` correctly classifies the 14pt-Heading-3
+company *while still* letting an 11pt Heading 3 fall through to job_title.
+The conjunction is implicit in the ordering.
+
+**Why this matters beyond aesthetic.**
+
+- *Every rule is independently readable.* A reviewer can point at rule 4
+  and say "this catches Microsoft because of X" without mentally
+  evaluating a boolean tree. That property scales — to clients reading
+  configs, to colleagues debugging, to future-you in six months.
+- *The smaller the grammar, the smaller the prompt.* `analyse.py` instructs
+  Mistral on the grammar; a grammar with `&&`/`||`/`!`/precedence rules
+  needs paragraphs of explanation. The single-signal-with-ordering grammar
+  fits in three lines.
+- *Validation is trivial.* A no-`eval()` parser for four shapes is ten
+  lines of `if/elif`. A boolean expression parser is fifty lines plus a
+  lexer plus operator-precedence tests — and every operator added is a
+  new attack surface for a config-author typo.
+- *Adding an operator is a slippery slope.* Today `&&`. Tomorrow `||`,
+  then `!`, then parenthesisation, then a tokeniser. The grammar has to
+  draw the line somewhere; the question is whether the line earns its
+  keep. Three different CV structures passed through the existing four
+  signals + ordering — the cross-document validation IS the empirical
+  argument that the line is in the right place for this document class.
+
+**When this would be the wrong choice.** Real expression trees earn their
+keep when two predicates are genuinely independent — when a rule needs
+`(A or B) and (C or D)` and neither half implies the other. In that case,
+decision-list ordering becomes contorted. We may hit that on document
+classes far enough from CVs that the natural unit of hierarchy isn't a
+single dominant signal (e.g. tabular financial reports where "right-aligned
+numeric column" *and* "row of horizontal line" both matter). When that
+happens, the grammar gets extended deliberately with one new operator,
+justified by a concrete document that needed it — not by an LLM's
+instinct.
+
+---
+
+## Phase 2 — When the LLM won't honour your grammar (and that's fine)
+
+This is the Phase 2 finding most likely to survive contact with a paying
+client. It is also the most uncomfortable one to publish.
+
+**What happened.** `analyse.py` asks Mistral to produce `fingerprint_rules`
+under the four-signal grammar. The prompt names the grammar explicitly,
+lists the supported signals, instructs *each rule has exactly one signal*,
+adds a worked example showing how ordering replaces compound conditions,
+and finishes with "DO NOT write compound signals — the parser will reject
+them".
+
+Mistral produced compound `&&` signals on three consecutive iterations.
+
+The strictness of the prompt did not move the model. The second attempt
+silently corrupted the validation: a rule of the shape
+`style==Heading 3 && rendered_size==14` *parsed* as a literal style name
+that would never match anything — a rule that does nothing without
+announcing itself. Phase 2's design principle ("silent wrong output is the
+worst failure mode") made me strengthen `parse_signal` to reject any
+`&&`/`||` token outright, regardless of the leading signal.
+
+**The takeaway is not "Mistral is bad at instructions".** It is that the
+LLM has a strong prior — classification rules want conjunctions — and a
+short prompt cannot fully override it. The right response is not to fight
+that for another five iterations. It is to design the system so that
+load-bearing constraints are enforced *outside* the prompt.
+
+Three concrete defences came out of this finding, all worth keeping:
+
+1. **A no-`eval()` parser, exhaustive on the grammar.** Anything not in
+   the grammar raises, loudly. If the LLM invents an operator, the
+   parser refuses it before `chunker.py` ever sees the config.
+2. **Validate at config-WRITE time, not chunk time.** `analyse.py` runs
+   every proposed rule through `chunker.parse_signal` against a dummy
+   `Paragraph` before writing `config.json`. A broken rule fails *while
+   the human is looking at the proposed config*, not three steps later
+   inside `ingest.py`. The human can choose to fix the LLM output or
+   author rules manually; either way the bad config never lands.
+3. **The "Mistral proposes, human approves" loop is load-bearing.** The
+   spec calls this out as an architecture decision. After three failed
+   iterations on this single document, "approves" became "writes the
+   rules from the profile and ignores Mistral's structural ones, while
+   keeping its strategy/metadata/prefix recommendations". That is the
+   workflow the spec intends. Treating it as ceremonial — running with
+   `--yes` and hoping — would have silently produced a broken pipeline.
+
+**The harder, broader lesson.** When you build an agentic pipeline whose
+intermediate artifacts are produced by an LLM and consumed by code, the
+LLM is going to surprise you. Sometimes it surprises in the direction you
+wanted (Mistral correctly diagnosed every document's structure, all three
+times). Sometimes it doubles down on a prior the prompt explicitly
+contradicts. The discipline that makes this productive — strict
+validation, schema-enforced output, fall-back-to-human paths — is the
+same discipline that makes any *non-LLM* untrusted-input pipeline
+productive. The LLM is just a more eloquent untrusted input.
+
+---
+
+## Phase 2 — The common paragraph model: "pluggable" earns its keep
+
+Phase 1's spec described a "format-agnostic loader" and a "pluggable
+strategy registry" as out-of-scope for Week 1. Phase 2 built the loader
+half. The pluggability claim got tested when I added the PDF loader.
+
+**What it cost to add `.pdf` support, in lines of code touched outside
+the new loader:**
+
+- `loaders/__init__.py` — one new import line, one new entry in the
+  `_LOADERS_BY_EXT` dispatch dict.
+- `requirements.txt` — one line (`pdfplumber>=0.10.0`).
+
+**What was NOT touched: `chunker.py`. `analyse.py` only changed because
+PDF paragraphs legitimately have `style_name=None`, and the existing
+`r.style_name.startswith("Heading")` calls weren't None-safe. That bug
+was Phase-1 latent — not a structural change, just a fix made visible.**
+
+This is the empirical test of the common-model claim. If chunking had any
+branching on file format, it would have shown up here as
+`if source_format == 'pdf': …` landing in `chunker.py`. It didn't. The
+common `Paragraph` dataclass quarantines every format-specific concern in
+its loader, and every downstream component reads the same shape.
+
+**The detail that matters.** This works only because `Paragraph` is
+*content-aware enough*. The original spec model had seven formatting
+fields. We added two pragmatic extras during the Phase 2 architecture
+conversation — `date` (load-bearing for the docx loader's table-column
+pairing) and `override` (used by `analyse.py`'s consistency report C3).
+PDFs leave them at defaults. Without those two, the docx loader would
+have lost capability or needed parallel data structures — exactly the
+"format-specific shape leaks into the model" failure pluggability is
+supposed to prevent. The architecture conversation that surfaced this
+question — "should the common model carry content-derived fields or
+only formatting fields?" — was the single highest-leverage decision in
+Phase 2.
+
+**Hand-wave-able generalisation.** Adding a third format (HTML, RTF,
+ePub) follows the same shape: one new loader, one dispatch entry. The
+interesting cost is not in the wiring — it is in heuristic quality (how
+good is the format-to-`Paragraph` translation?), which is loader-specific
+work.
+
+---
+
+## Phase 2 — Same content, two formats: PDFs survive the conversion better than expected
+
+The PDF loader was tested on a `.pdf` rendering of `sample_cv.docx` (same
+content, two formats). The comparison is the clearest demonstration of
+the pluggable-loader claim and worth keeping for client conversations.
+
+| Metric                | .docx  | .pdf   | Δ |
+|-----------------------|-------:|-------:|---|
+| paragraphs extracted  | 48     | 50     | +2 ("Page 1 of 2" footer ×2 pages) |
+| bullets recovered     | **21** | **21** | 0 |
+| avg words / paragraph | 13     | 13     | 0 |
+| Strategy A chunks     | **11** | **11** | 0 |
+| Strategy A2 chunks    | 28     | 29     | +1 |
+| companies captured    | 5      | 6      | +1 |
+
+**The headline:** bullet count identical, A-chunk count identical, average
+paragraph word count identical. The PDF loader's word-line-paragraph
+reconstruction matches what the `.docx`'s explicit `<w:numPr>` and
+paragraph elements knew directly.
+
+**The mechanism that made bullets work.** PDF lists rendered as a literal
+`-` glyph in one font (Cambria), with the bullet text in another (Calibri),
+both at approximately the same y-position. The PDF loader treats *any line
+whose leftmost word is a list marker* as an unconditional paragraph break —
+the PDF analogue of `<w:numPr>`. A line of body text wrapping onto a second
+line is not a new paragraph; a `-` at the left margin always is. That
+single heuristic — list-marker-as-hard-paragraph-break, before any
+gap-based reasoning — recovered every bullet in this CV.
+
+**The +1 result is the loader being slightly *better* than the .docx
+config.** The PDF caught a 12pt+bold "Senior Customer Engineer 2011-2014"
+outlier as a job title (the rule `rendered_size==12 -> job_title` fired).
+The `.docx` config (which uses `style==Heading 3 -> job_title`) doesn't
+have a rule for the 12pt+bold case and let it fall to body text. Same
+document, two formats, two configs — each tuned to the signals its loader
+exposes. The lesson is not "PDF is better" but "the per-format config is
+where the loader's strengths and limits show up; the chunker stays
+unchanged".
+
+**The +2 paragraph count is harmless noise.** Two PDF pages = two "Page 1
+of 2" footers. They are their own paragraphs in the loader output and fall
+through every rule to `body_text` — no role units opened, no chunk impact.
+A future loader could filter known-footer patterns; for now they're
+visible and harmless.
+
+---
+
+## Phase 2 — Validation: keeping hallucination separate from retrieval gaps
+
+`validate.py` runs a fixed 7-question set against each of the three CVs
+and reports two distinct numbers, deliberately separated:
+
+- **Hallucination test (the salary question).** "What is his current
+  salary?" — the CV does not contain this. Refusal here = ✓ correct
+  grounding.
+- **Retrieval-gap rate (the other 6 questions).** Refusal here = the
+  top-k retrieved chunks didn't contain the answer. NOT a hallucination,
+  but a retrieval-quality signal.
+
+The result on Phase 2's three CVs: **all three correctly refused the
+hallucination question**, and retrieval-gap rates of 2/6, 3/6, and 4/6
+across the answerable questions.
+
+**The framing matters more than the numbers.** Earlier drafts of
+`comparison.md` lumped both refusal types into "overall refusal rate" with
+the same `(hallucination test passed)` label. That conflates a *desired*
+behaviour (refusing to fabricate) with an *undesired* one (failing to
+retrieve). To anyone reading the report, "5/7 refused" looks like a
+broken system; the truth is "1/7 correctly refused, 4/6 retrieval gaps".
+A bullet point in a portfolio piece is not the place to discover this
+ambiguity.
+
+**Why retrieval gaps are the more interesting number for the next
+iteration.** They show where the embedding space is letting the system
+down — a "core skills" question that fails to retrieve the Core Skills
+chunk is a vector-search miss, not a generation failure. The CV's "Core
+Skills" chunk is short (~25 words); under cosine similarity to a longer
+question vector, longer chunks tend to win. That is a known property of
+cosine + uneven chunk sizes and a candidate for hybrid retrieval (BM25
+keyword + semantic) or larger top-k with re-ranking — both production
+upgrades the README's table already names.
+
+**Hallucination behaviour was robust.** No CV produced a fabricated
+salary, including on cv3 where the document is heavily tabular and the
+chunker captured less linear context. That is the strongest result of the
+Phase 1 + Phase 2 work taken together: the fixed-fallback-phrase
+instruction (Phase 1) plus the per-CV config that delivers correct chunks
+(Phase 2) gave a grounded-only system that knows when to refuse, across
+three structurally-different inputs.
+
+---
+
 ## Status
 
-Week 1 build complete (6 phases + README). Cross-CV test done — it defined the
-post-Week-1 priority: make `chunker.py`'s decode config-driven so the pipeline
-works on any CV, not just the one it was built for.
+**Phase 1 (Week 1) complete.** Six implementation steps, 112-cell stress
+test, README.
+
+**Phase 2 complete.** Config-driven chunker, common `Paragraph` model
++ `loaders/`, cross-document validation on three CVs, PDF loader. The
+post-Week-1 priority is closed: the pipeline works on three
+structurally-different CVs with no chunker code changes between them, and
+the loader stack accepts a new file format with one new file and one
+dispatch entry.
+
+**What's open next.** Multi-document Q&A. Today the pipeline indexes one
+document at a time into per-CV collections; an RFI/RFP context wants a
+multi-document searchable corpus with metadata-filtered retrieval. That
+is also where the Phase 1 spec's "pluggable strategy registry" sketch
+becomes concrete — different document classes (CV vs RFI vs report) need
+different chunking strategies, not just different `fingerprint_rules` in
+the same strategy.

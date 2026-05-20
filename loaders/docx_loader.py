@@ -10,7 +10,7 @@ This is the refactor of the Phase 1 `docx_parser.py`. The parsing logic is
 UNCHANGED — same style-inheritance walk, same numPr bullet detection, same
 table date-column pairing. Only the output type changed: it now emits the
 common `Paragraph` model (models/paragraph.py) instead of raw dicts, so the
-rest of the pipeline is format-agnostic (SPEC_PHASE2.md, Decision 2).
+rest of the pipeline is format-agnostic (docs/SPEC_PHASE2.md, Decision 2).
 
 A Paragraph is dropped if it is an empty non-list paragraph — a layout spacer.
 

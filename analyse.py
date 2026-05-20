@@ -14,7 +14,7 @@ different things — authors mix heading styles with plain direct formatting.
 So this script does not hardcode "Heading 3 = company". It enumerates every
 distinct formatting fingerprint and lets a human + Mistral map fingerprints to
 roles. That makes the analyser reusable for any document type, not just this CV.
-See LEARNING_NOTES.md, "Phase 2 — real documents lie about their structure".
+See docs/LEARNING_NOTES.md, "Phase 2 — real documents lie about their structure".
 """
 
 import argparse

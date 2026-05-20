@@ -12,7 +12,7 @@ collection, assembles a grounded prompt, and asks Mistral to answer.
 ARCHITECTURAL DECISION: the query is embedded with the SAME model
 (mistral-embed) that embedded the documents. Retrieval compares the query
 vector to the stored vectors; vectors from different models live in different
-spaces and are not comparable (LEARNING_NOTES.md, Decision 7).
+spaces and are not comparable (docs/LEARNING_NOTES.md, Decision 7).
 """
 
 import argparse

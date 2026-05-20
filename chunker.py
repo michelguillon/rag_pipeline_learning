@@ -11,7 +11,7 @@ Two strategies (spec Decision 2):
 ARCHITECTURAL DECISION: semantic chunking, not fixed-size.
 Each chunk is a complete structural unit (a role, or a bullet). There is no
 chunk-size or overlap parameter — chunk size is an observed *outcome*, reviewed
-in review_chunks.py, not an input. See LEARNING_NOTES.md, "Phase 3".
+in review_chunks.py, not an input. See docs/LEARNING_NOTES.md, "Phase 3".
 
 DECISION (Phase 3 review): consecutive job titles collapse into one role.
 The CV lists 'Director' then 'Associate Director' back-to-back under one
@@ -49,7 +49,7 @@ def load_config(path=CONFIG_PATH):
 # document but chunker.py ignored most of that and re-reasoned its own logic.
 # Phase 2 closes that loop: analyse.py + a human author an ordered list of
 # fingerprint_rules, chunker.py only executes it. Same code, any document —
-# only config.json changes. See SPEC_PHASE2.md, Decision 1.
+# only config.json changes. See docs/SPEC_PHASE2.md, Decision 1.
 
 # The four signal shapes config.json may use. The decode is a pure lookup
 # against this grammar — see parse_signal below for why it is not eval().

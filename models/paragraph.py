@@ -11,7 +11,7 @@ objects. `chunker.py` used to receive python-docx paragraph objects directly.
 A PDF paragraph comes from a different library with a different object shape;
 if `chunker.py` knew about both it would become a format-specific parser, which
 defeats the separation of concerns. With this model, adding a new format is
-adding one loader — nothing downstream changes. See SPEC_PHASE2.md, Decision 2.
+adding one loader — nothing downstream changes. See docs/SPEC_PHASE2.md, Decision 2.
 
 ARCHITECTURAL DECISION: the model carries `date` and `override` even though
 they are not pure formatting attributes (text + style + size + flags).

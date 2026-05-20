@@ -22,7 +22,6 @@ full span (e.g. Dec 2019 – Apr 2022).
 
 import json
 import re
-from collections import Counter
 from pathlib import Path
 
 from loaders import load_docx
@@ -40,47 +39,87 @@ def load_config(path=CONFIG_PATH):
 
 
 # ──────────────────────────────────────────────
-# DECODE — assign each paragraph a structural role
+# DECODE — assign each paragraph a structural role, per config.json
 # ──────────────────────────────────────────────
+#
+# ARCHITECTURAL DECISION (Phase 2): the decode rules live in config.json,
+# not in this file. Phase 1 derived roles here from heuristics computed at
+# runtime (modal body size, top heading style). Those heuristics were never
+# *declared*, *inspectable*, or *per-document* — analyse.py profiled the
+# document but chunker.py ignored most of that and re-reasoned its own logic.
+# Phase 2 closes that loop: analyse.py + a human author an ordered list of
+# fingerprint_rules, chunker.py only executes it. Same code, any document —
+# only config.json changes. See SPEC_PHASE2.md, Decision 1.
 
-def body_size_of(records):
-    """Modal font size among non-bullet paragraphs — the 'body text' size."""
-    sizes = Counter(r.rendered_size for r in records
-                    if not r.has_num_pr and r.rendered_size is not None)
-    return sizes.most_common(1)[0][0] if sizes else None
+# The four signal shapes config.json may use. The decode is a pure lookup
+# against this grammar — see parse_signal below for why it is not eval().
+SUPPORTED_SIGNALS = ("has_numPr", "is_bold", "rendered_size=={n}",
+                     "style=={name}")
 
 
-def top_heading_style(records):
-    """The highest-level heading style present ('Heading 1' before 'Heading 3')."""
-    headings = sorted({r.style_name for r in records
-                       if r.style_name.startswith("Heading")})
-    return headings[0] if headings else None
+def parse_signal(signal, paragraph):
+    """Evaluate one config signal string against a Paragraph. Returns bool.
 
+    ARCHITECTURAL DECISION: an explicit signal grammar, never eval().
+    config.json is a user-editable file. eval() on its contents would execute
+    arbitrary Python — a config author would silently gain code execution.
+    So we match four fixed signal shapes by hand. The grammar is deliberately
+    tiny: a document needing a signal not listed here is a deliberate decision
+    to extend SUPPORTED_SIGNALS, reviewed in code — not a config surprise.
 
-def decode_role(rec, section_style, body_size):
-    """Map one paragraph to a structural role.
+      has_numPr            -> the paragraph is a list item
+      is_bold              -> the paragraph renders bold
+      rendered_size=={n}   -> rendered font size equals n points
+      style=={name}        -> the paragraph style name equals {name}
 
-    Ordered rule (spec Decision 1) — the order matters:
-      1. has numPr            -> bullet
-      2. is the section style -> section  (before the size test, so a large
-                                           section heading is not mistaken
-                                           for a company header)
-      3. larger than body     -> header   (company / sub-section: size-driven,
-                                           because company styling is
-                                           inconsistent — see config decode_note)
-      4. any heading style    -> title    (e.g. Heading 3 at body size)
-      5. otherwise            -> body
+    An unrecognised signal raises ValueError rather than returning False — a
+    typo in config.json must fail loudly, not silently skip a rule.
     """
-    if rec.has_num_pr:
-        return "bullet"
-    if section_style and rec.style_name == section_style:
-        return "section"
-    if (body_size is not None and rec.rendered_size is not None
-            and rec.rendered_size > body_size):
-        return "header"
-    if rec.style_name.startswith("Heading"):
-        return "title"
-    return "body"
+    signal = signal.strip()
+    # Reject compound signals up front. Without this check, a signal like
+    # `style==Heading 3 && rendered_size==14` would slip past the `style==`
+    # branch as a literal style name that never matches anything — a rule that
+    # silently does nothing is the exact failure mode Phase 2 exists to fix.
+    # The grammar is a decision LIST, not a boolean expression tree: use
+    # ordered single-signal rules and let rule order do the job a `&&` would.
+    for op in ("&&", "||"):
+        if op in signal:
+            raise ValueError(
+                f"Compound signal not supported: {signal!r}. The grammar is a "
+                f"decision list — use ORDERED single-signal rules and let rule "
+                f"order disambiguate overlapping cases. Supported signals: "
+                f"{', '.join(SUPPORTED_SIGNALS)}.")
+    if signal == "has_numPr":
+        return paragraph.has_num_pr
+    if signal == "is_bold":
+        return paragraph.is_bold
+    if signal.startswith("rendered_size=="):
+        target = signal[len("rendered_size=="):].strip()
+        return (paragraph.rendered_size is not None
+                and paragraph.rendered_size == float(target))
+    if signal.startswith("style=="):
+        name = signal[len("style=="):].strip()
+        return paragraph.style_name == name
+    raise ValueError(
+        f"Unknown signal {signal!r} in config.json fingerprint_rules. "
+        f"Supported signals: {', '.join(SUPPORTED_SIGNALS)}.")
+
+
+def decode_role(paragraph, rules):
+    """Map one paragraph to a structural role using the ordered config rules.
+
+    Rules are applied IN CONFIG ORDER; the first whose signal matches wins.
+    The order is load-bearing (spec Decision 1): a company header may be BOTH
+    14pt AND styled 'Heading 3', so a 'rendered_size==14 -> company' rule must
+    sit BEFORE 'style==Heading 3 -> job_title'. chunker.py trusts the order
+    analyse.py + a human set in config.json — it does not re-reason it.
+
+    No rule matches -> 'body_text' (spec Step 3).
+    """
+    for rule in rules:
+        if parse_signal(rule["signal"], paragraph):
+            return rule["role"]
+    return "body_text"
 
 
 def date_span(dates):
@@ -106,14 +145,20 @@ def date_span(dates):
 # GROUP — walk the decoded paragraphs into units
 # ──────────────────────────────────────────────
 
-def build_units(records, section_style, body_size):
-    """Walk the document into structural units.
+def build_units(records, rules):
+    """Walk the decoded paragraphs into structural units.
 
-    A new unit opens at each section, each company header, and each job title
-    that begins a fresh role. CONSECUTIVE titles collapse into one role — the
-    senior/first title is kept, the rest only contribute their dates (Phase 3
-    review decision). This single grouping feeds BOTH strategies, so A and A2
-    are always two views of the same structural read.
+    decode_role (config-driven) labels each paragraph; this function GROUPS
+    those labels into units. Decode is config-driven, grouping is not — the
+    config maps a paragraph to a role, the code knows what each role does to
+    the running structure (a 'company' opens a role unit, a 'section_header'
+    resets the section, etc.).
+
+    A new unit opens at each section header, each company header, and each job
+    title that begins a fresh role. CONSECUTIVE job titles collapse into one
+    role — the senior/first title is kept, the rest only contribute their
+    dates (Phase 3 review decision). This single grouping feeds BOTH
+    strategies, so A and A2 are always two views of the same structural read.
     """
     units = []
     section = None
@@ -129,18 +174,18 @@ def build_units(records, section_style, body_size):
         units.append(cur)
 
     for rec in records:
-        role = decode_role(rec, section_style, body_size)
+        role = decode_role(rec, rules)
         text, date = rec.text, rec.date
 
-        if role == "section":
+        if role == "section_header":
             section = text
             company = None
             open_unit("section", text)
-        elif role == "header":
+        elif role == "company":
             company = text
             open_unit("role", text)
-        elif role == "title":
-            if prev_role == "title" and cur is not None:
+        elif role == "job_title":
+            if prev_role == "job_title" and cur is not None:
                 # consecutive title — collapse: keep only its date, drop text
                 if date:
                     cur["dates"].append(date)
@@ -155,7 +200,7 @@ def build_units(records, section_style, body_size):
             if cur is None:
                 open_unit("section", section or "(document)")
             cur["bullets"].append(text)
-        else:  # body
+        else:  # body_text (the decode_role default for an unmatched paragraph)
             if cur is None:
                 open_unit("section", section or "(document)")
             cur["body"].append(text)
@@ -306,10 +351,15 @@ def all_chunks(docx_path, config=None):
     One document read feeds both — A and A2 are two views of the same units.
     """
     config = config or load_config()
+    rules = config.get("fingerprint_rules")
+    if not rules:
+        raise ValueError(
+            "config.json has no 'fingerprint_rules' — run analyse.py to "
+            "generate them. A config-driven chunker cannot decode without "
+            "rules, and silently producing whole-document mega-chunks is the "
+            "exact failure mode Phase 2 exists to fix. Refusing to chunk.")
     records = load_docx(docx_path)
-    section_style = config.get("section_signal") or top_heading_style(records)
-    body_size = body_size_of(records)
-    units = build_units(records, section_style, body_size)
+    units = build_units(records, rules)
     return {
         "A": chunks_strategy_a(units),
         "A2": chunks_strategy_a2(units, config.get("prefix_template", "")),

@@ -14,7 +14,7 @@ different things — authors mix heading styles with plain direct formatting.
 So this script does not hardcode "Heading 3 = company". It enumerates every
 distinct formatting fingerprint and lets a human + Mistral map fingerprints to
 roles. That makes the analyser reusable for any document type, not just this CV.
-See LEARNING_NOTES.md, "Phase 2 — real documents lie about their structure".
+See docs/LEARNING_NOTES.md, "Phase 2 — real documents lie about their structure".
 """
 
 import argparse
@@ -23,10 +23,10 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from docx import Document
-
-from docx_parser import extract_paragraphs
+import chunker
+from loaders import load
 from mistral_helpers import get_client, call_with_retry
+from models import Paragraph
 
 # config.json lands here. The 4 collection names are fixed by spec Decision 4
 # (a ChromaDB collection's distance metric is immutable once created).
@@ -41,9 +41,10 @@ COLLECTIONS = {
 # one place large earns its cost — and it is a single call, so spend is trivial.
 RECOMMEND_MODEL = "mistral-large-latest"
 
-# Paragraph extraction (extract_paragraphs) lives in docx_parser.py — shared
-# with chunker.py so the preview and the ingested chunks come from an identical
-# reading of the document.
+# Document loading uses the loaders.load(path) dispatcher — it picks
+# load_docx / load_pdf by extension and returns the common Paragraph model
+# (models/paragraph.py), shared with chunker.py so the preview and the
+# ingested chunks come from an identical reading of the document.
 
 
 # ──────────────────────────────────────────────
@@ -59,7 +60,7 @@ def build_profile(records):
     """
     groups = defaultdict(list)
     for rec in records:
-        fp = (rec["style"], rec["size"], rec["bold"], rec["is_list"])
+        fp = (rec.style_name, rec.rendered_size, rec.is_bold, rec.has_num_pr)
         groups[fp].append(rec)
 
     profile = []
@@ -67,7 +68,7 @@ def build_profile(records):
         profile.append({
             "style": style, "size": size, "bold": bold, "is_list": is_list,
             "count": len(recs),
-            "sample": recs[0]["text"][:70],
+            "sample": recs[0].text[:70],
         })
     profile.sort(key=lambda p: p["count"], reverse=True)
     return profile
@@ -83,7 +84,10 @@ def consistency_report(records):
     flags = []
 
     # C1 — bullets under more than one paragraph style
-    bullet_styles = sorted({r["style"] for r in records if r["is_list"]})
+    # PDF paragraphs carry style_name=None (no style system). Filter those out
+    # of the bullet-styles set — sorted() chokes on a None mixed with strings.
+    bullet_styles = sorted({r.style_name for r in records
+                            if r.has_num_pr and r.style_name is not None})
     if len(bullet_styles) > 1:
         flags.append(
             f"Bullets appear under {len(bullet_styles)} different styles "
@@ -92,18 +96,19 @@ def consistency_report(records):
         )
 
     # 'body' size = the most common size among non-list paragraphs
-    body_sizes = Counter(r["size"] for r in records
-                         if not r["is_list"] and r["size"] is not None)
+    body_sizes = Counter(r.rendered_size for r in records
+                         if not r.has_num_pr and r.rendered_size is not None)
     body_size = body_sizes.most_common(1)[0][0] if body_sizes else None
 
     # C2 — visually prominent text that carries NO heading style
     if body_size is not None:
         prominent = [r for r in records
-                     if not r["is_list"]
-                     and not r["style"].startswith("Heading")
-                     and r["size"] is not None and r["size"] > body_size]
+                     if not r.has_num_pr
+                     and not (r.style_name or "").startswith("Heading")
+                     and r.rendered_size is not None
+                     and r.rendered_size > body_size]
         if prominent:
-            samples = ", ".join(repr(r["text"][:25]) for r in prominent[:3])
+            samples = ", ".join(repr(r.text[:25]) for r in prominent[:3])
             flags.append(
                 f"{len(prominent)} paragraph(s) are larger than body text "
                 f"({body_size}pt) but use NO heading style ({samples}) — a "
@@ -112,7 +117,7 @@ def consistency_report(records):
 
     # C3 — heading styles overridden by a direct font size
     overridden = [r for r in records
-                  if r["style"].startswith("Heading") and r["override"]]
+                  if (r.style_name or "").startswith("Heading") and r.override]
     if overridden:
         flags.append(
             f"{len(overridden)} heading-styled paragraph(s) carry a direct "
@@ -128,22 +133,22 @@ def detect_sections(records):
     Returns (sections, section_style). Each section: title, paragraphs,
     bullets, words.
     """
-    heading_styles = sorted({r["style"] for r in records
-                             if r["style"].startswith("Heading")})
+    heading_styles = sorted({r.style_name for r in records
+                             if (r.style_name or "").startswith("Heading")})
     if not heading_styles:
         return [], None
     section_style = heading_styles[0]  # 'Heading 1' sorts before 'Heading 3'
 
     sections, current = [], None
     for rec in records:
-        if rec["style"] == section_style:
-            current = {"title": rec["text"], "paragraphs": 0,
+        if rec.style_name == section_style:
+            current = {"title": rec.text, "paragraphs": 0,
                        "bullets": 0, "words": 0}
             sections.append(current)
         elif current is not None:
             current["paragraphs"] += 1
-            current["words"] += rec["words"]
-            if rec["is_list"]:
+            current["words"] += len(rec.text.split())
+            if rec.has_num_pr:
                 current["bullets"] += 1
     return sections, section_style
 
@@ -154,16 +159,16 @@ def estimate_chunks(records, sections):
     Precision is not the point — analyse.py informs a recommendation; the
     real chunker is chunker.py (Phase 3), built from config.json.
     """
-    n_bullets = sum(1 for r in records if r["is_list"])
+    n_bullets = sum(1 for r in records if r.has_num_pr)
     # A.2 ≈ one chunk per bullet + one per non-bullet section
     n_no_bullet_sections = sum(1 for s in sections if s["bullets"] == 0)
     a2 = n_bullets + n_no_bullet_sections
     # A ≈ one chunk per section + one per sub-heading (heading styles below
     # the top-level section style — i.e. roles/sub-sections)
-    heading_styles = sorted({r["style"] for r in records
-                             if r["style"].startswith("Heading")})
+    heading_styles = sorted({r.style_name for r in records
+                             if (r.style_name or "").startswith("Heading")})
     sub_styles = set(heading_styles[1:])
-    n_sub = sum(1 for r in records if r["style"] in sub_styles)
+    n_sub = sum(1 for r in records if r.style_name in sub_styles)
     a = len(sections) + n_sub
     return {"A": a, "A2": a2, "n_bullets": n_bullets}
 
@@ -175,10 +180,74 @@ def estimate_chunks(records, sections):
 RECOMMENDATION_SHAPE = """{
   "recommended_strategy": "A" or "A2",
   "reasoning": "one short paragraph",
+  "fingerprint_rules": [
+    { "signal": "<signal>", "role": "<role>" }
+  ],
   "metadata_fields": ["field_name", ...],
   "prefix_template": "a string using {field_name} placeholders",
   "risks": ["risk", ...]
 }"""
+
+# The decode-rule grammar, described to Mistral. chunker.parse_signal parses
+# exactly these four signal shapes — keep this text and that function in sync.
+DECODE_RULES_BRIEF = """DECODE RULES — `fingerprint_rules`, the core of the config.
+chunker.py classifies every paragraph by walking an ORDERED list of rules and
+taking the FIRST whose signal matches. Produce that list. Each rule is an
+object { "signal": <signal>, "role": <role> }.
+
+Allowed signals (no others exist — chunker.py parses these by hand, never
+eval(), so an unlisted signal is a hard error):
+  has_numPr            paragraph is a list item — the reliable bullet signal
+  is_bold              paragraph renders bold
+  rendered_size==<n>   rendered font size equals <n> points, e.g. rendered_size==14
+  style==<name>        paragraph style name equals <name>, e.g. style==Heading 1
+
+Allowed roles:
+  bullet          a list item
+  company         an employer / company header — opens a job entry
+  job_title       a role title held within a company
+  section_header  a top-level CV section ("Experience", "Education", ...)
+  body_text       anything else — this is the DEFAULT; emit no rule for it
+
+EACH RULE HAS EXACTLY ONE SIGNAL. Compound signals are FORBIDDEN. The parser
+will REJECT any signal containing `&&`, `||`, or `!`. Do NOT write rules like
+`rendered_size==14 && is_bold` or `style==Heading 3 && rendered_size==14` —
+those will fail validation and the config will not be written.
+
+The grammar is deliberately minimal because the next layer below is decision-
+list semantics: ORDER IS LOAD-BEARING. The first matching rule wins. If a
+paragraph satisfies two signals at once, place the rule that must win FIRST
+and let the rule ORDER do the job a `&&` would.
+
+WORKED EXAMPLE. Suppose a document has TWO uses of style `Heading 3`:
+  - company headers at 14pt ("Microsoft")
+  - job titles at 11pt ("Head of Solution Consulting")
+AND there are other 14pt items that are NOT companies (e.g. a "Core Skills"
+heading styled `Heading 4` at 14pt). The CORRECT decode is single-signal +
+ordered:
+
+  1. has_numPr           -> bullet         (always first; bullets are noisy)
+  2. style==Heading 1    -> section_header (top-level sections)
+  3. style==Heading 4    -> section_header (BEFORE the size rule, so the
+                                            14pt 'Core Skills' is caught here
+                                            and not misread as a company)
+  4. rendered_size==14   -> company        (catches both the 14pt Heading 3
+                                            company AND any bare-style 14pt
+                                            company name)
+  5. style==Heading 3    -> job_title      (only 11pt Heading 3 reaches here;
+                                            the 14pt one was caught at step 4)
+
+That is the entire pattern. NO compound conditions. Use the same shape for
+this document: identify each role's most-distinctive single signal, order so
+the most specific catches fire first, and trust ordering to handle the rest.
+
+Use the fingerprint-profile counts and samples below to pick signals that
+cleanly separate the roles in THIS document. Prefer the signal that is most
+consistent for a given role across its instances.
+
+NOTE on PDFs: PDFs have no paragraph style system; every paragraph's
+`style_name` is None, so `style==<name>` rules will never fire. For a PDF
+profile, lean on `rendered_size==<n>`, `is_bold`, and `has_numPr` only."""
 
 
 def ask_mistral(client, profile, flags, sections, estimates):
@@ -208,6 +277,8 @@ list-or-not) with counts and a sample line, plus objective consistency flags.
 STRUCTURAL PROFILE
 {json.dumps(summary, indent=2)}
 
+{DECODE_RULES_BRIEF}
+
 Two chunking strategies are on the table:
 - Strategy A  — one chunk per role/section: full context per chunk, but less
   precise retrieval for narrow questions.
@@ -220,9 +291,9 @@ recommend formatting attributes (font size, style, bold); those are parser
 internals, not user-facing facts. The prefix_template must use only those
 semantic {{placeholder}} fields.
 
-Recommend which strategy fits this document, the metadata to attach to each
-chunk, a prefix template, and the main risks. Respond ONLY with a JSON object
-of exactly this shape:
+Produce the ordered `fingerprint_rules`, recommend which strategy fits this
+document, the metadata to attach to each chunk, a prefix template, and the
+main risks. Respond ONLY with a JSON object of exactly this shape:
 {RECOMMENDATION_SHAPE}
 """
     response = call_with_retry(
@@ -245,14 +316,15 @@ def format_analysis(records, profile, flags, sections, section_style, estimates)
     bar = "─" * 64
     out = [bar, "STRUCTURAL ANALYSIS", bar]
     out.append(f"Paragraphs (non-empty): {len(records)}  "
-               f"| in tables: {sum(r['in_table'] for r in records)}")
+               f"| in tables: {sum(r.in_table for r in records)}")
 
     out.append(f"\nFORMATTING-FINGERPRINT PROFILE  ({len(profile)} distinct)")
     out.append(f"  {'count':>5}  {'style':18s} {'size':>6} {'bold':>4} "
                f"{'list':>4}  sample")
     for p in profile:
         size = "-" if p["size"] is None else f"{p['size']:g}"
-        out.append(f"  {p['count']:>5}  {p['style'][:18]:18s} {size:>6} "
+        style_str = (p["style"] or "-")[:18]   # PDF: style is None
+        out.append(f"  {p['count']:>5}  {style_str:18s} {size:>6} "
                    f"{int(p['bold']):>4} {int(p['is_list']):>4}  {p['sample'][:34]}")
 
     out.append(f"\nCONSISTENCY REPORT  ({len(flags)} flag(s))")
@@ -281,6 +353,9 @@ def format_recommendation(recommendation, usage):
     out = [bar, "MISTRAL RECOMMENDATION", bar]
     out.append(f"Recommended strategy : {recommendation.get('recommended_strategy')}")
     out.append(f"Reasoning            : {recommendation.get('reasoning')}")
+    out.append("Fingerprint rules (ordered — first match wins):")
+    for r in recommendation.get("fingerprint_rules", []):
+        out.append(f"  {str(r.get('signal', '')):24s} -> {r.get('role', '')}")
     out.append(f"Metadata fields      : {recommendation.get('metadata_fields')}")
     out.append(f"Prefix template      : {recommendation.get('prefix_template')}")
     out.append("Risks:")
@@ -291,20 +366,53 @@ def format_recommendation(recommendation, usage):
     return "\n".join(out)
 
 
-def build_config(recommendation, section_style, flags):
-    """Assemble config.json: structural facts (ours) + judgement (Mistral's)."""
+def validate_rules(rules):
+    """Check the fingerprint rules before config.json is written.
+
+    ARCHITECTURAL DECISION: validate at config-WRITE time, not at chunk time.
+    A signal Mistral mis-spells — or a later hand-edit typo — should fail HERE,
+    while the human is looking at the proposed config, not three steps later
+    inside ingest.py. Reuses chunker.parse_signal so analyse.py and chunker.py
+    can never drift on what a valid signal is: one grammar, defined once.
+
+    Returns a list of human-readable error strings ([] means valid).
+    """
+    if not rules:
+        return ["fingerprint_rules is empty — no decode rules were produced; "
+                "the chunker cannot classify any paragraph."]
+    probe = Paragraph(text="probe", style_name="Normal", rendered_size=11.0,
+                      is_bold=False, has_num_pr=False, in_table=False,
+                      source_format="docx")
+    errors = []
+    for i, rule in enumerate(rules):
+        if not rule.get("role"):
+            errors.append(f"rule {i}: missing 'role'")
+        try:
+            chunker.parse_signal(rule.get("signal", ""), probe)
+        except ValueError as exc:
+            errors.append(f"rule {i}: {exc}")
+        except Exception as exc:  # e.g. rendered_size==<not-a-number>
+            errors.append(f"rule {i}: signal {rule.get('signal')!r} — {exc}")
+    return errors
+
+
+def build_config(recommendation, flags):
+    """Assemble config.json: structural facts (ours) + judgement (Mistral's).
+
+    fingerprint_rules is the heart of it — the ordered decode rules chunker.py
+    executes. The Phase 1 section_signal / bullet_signal / decode_note keys are
+    gone: fingerprint_rules now carries that information explicitly, in a
+    machine-readable form the chunker actually reads.
+    """
     return {
         "strategy": recommendation.get("recommended_strategy", "A"),
         "document_type": "table_based",
-        "section_signal": section_style,
-        "bullet_signal": "paragraph has a numPr element (not a style name)",
-        "decode_note": ("company / sub-section headers are detected by font "
-                        "size, not by style — see consistency_flags"),
+        "fingerprint_rules": recommendation.get("fingerprint_rules", []),
         "collections": COLLECTIONS,
         "metadata_fields": recommendation.get(
-            "metadata_fields", ["company", "title", "dates", "section_type"]),
+            "metadata_fields", ["company", "job_title", "dates", "section_name"]),
         "prefix_template": recommendation.get(
-            "prefix_template", "[{company} | {title} | {dates}]"),
+            "prefix_template", "[{company} | {job_title} | {dates}]"),
         "consistency_flags": flags,
     }
 
@@ -319,6 +427,10 @@ def main():
     parser.add_argument("document", help="path to the .docx file")
     parser.add_argument("--yes", action="store_true",
                         help="write config.json without the interactive prompt")
+    parser.add_argument("--profile-only", action="store_true",
+                        help="print the structural profile and exit; do not "
+                             "call Mistral and do not write config.json. "
+                             "Useful for hand-authoring fingerprint_rules.")
     parser.add_argument("--trace", metavar="PATH", nargs="?",
                         const="outputs/analyse_trace.txt", default=None,
                         help="write a full trace (analysis + the exact prompt "
@@ -331,8 +443,7 @@ def main():
         sys.exit(f"Document not found: {path}")
 
     print(f"\nAnalysing: {path}")
-    doc = Document(str(path))
-    records = extract_paragraphs(doc)
+    records = load(path)
     if not records:
         sys.exit("No content found in the document.")
 
@@ -344,6 +455,15 @@ def main():
                                     sections, section_style, estimates)
     print("\n" + analysis_text)
 
+    # --profile-only: print the structural profile and stop. Useful for the
+    # human-authored config path — the same workflow analyse.py + Mistral runs,
+    # minus the Mistral call (and the API spend). Also useful for the broader
+    # analyser-generalisation goal: profile any document, no chunking required.
+    if args.profile_only:
+        print("\n(--profile-only: skipping Mistral recommendation and config "
+              "write. Author fingerprint_rules from the profile above.)")
+        return
+
     print(f"\nAsking {RECOMMEND_MODEL} for a chunking recommendation...")
     client = get_client()
     recommendation, usage, prompt, raw_response = ask_mistral(
@@ -352,7 +472,7 @@ def main():
     recommendation_text = format_recommendation(recommendation, usage)
     print("\n" + recommendation_text)
 
-    config = build_config(recommendation, section_style, flags)
+    config = build_config(recommendation, flags)
     config_text = json.dumps(config, indent=2)
     bar = "─" * 64
     print(f"\n{bar}\nPROPOSED config.json\n{bar}")
@@ -373,6 +493,19 @@ def main():
         trace_path.parent.mkdir(parents=True, exist_ok=True)
         trace_path.write_text(trace, encoding="utf-8")
         print(f"\nTrace written to {trace_path}")
+
+    # Validation gate: a config whose fingerprint_rules do not parse is never
+    # written — not even with --yes. A broken config would only surface as a
+    # crash inside chunker.py later; catch it here, where the human can see it.
+    rule_errors = validate_rules(config["fingerprint_rules"])
+    if rule_errors:
+        print(f"\n{bar}\nfingerprint_rules INVALID — {len(rule_errors)} "
+              f"error(s)\n{bar}")
+        for err in rule_errors:
+            print(f"  ! {err}")
+        print("\nconfig.json NOT written. Fix the decode rules and re-run "
+              "(the --trace file holds the raw model output for debugging).")
+        return
 
     if args.yes:
         accepted = True

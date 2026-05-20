@@ -1,13 +1,18 @@
 """
-docx_parser.py — turn a .docx into a flat list of paragraph records
-===================================================================
-Shared by analyse.py (profiling) and chunker.py (chunk assembly), so both
-read the document through exactly the same lens. If they parsed differently,
-review_chunks.py would preview something other than what ingest.py stores.
+loaders/docx_loader.py — turn a .docx into a list of Paragraph objects
+======================================================================
+A format-specific loader: it knows everything about python-docx and nothing
+about chunking. Public interface is a single function:
 
-A "record" is a dict:
-    text, style, size, bold, is_list, override, in_table, words, date
-Empty non-list paragraphs (layout spacers) are dropped.
+    load_docx(path: str) -> list[Paragraph]
+
+This is the refactor of the Phase 1 `docx_parser.py`. The parsing logic is
+UNCHANGED — same style-inheritance walk, same numPr bullet detection, same
+table date-column pairing. Only the output type changed: it now emits the
+common `Paragraph` model (models/paragraph.py) instead of raw dicts, so the
+rest of the pipeline is format-agnostic (docs/SPEC_PHASE2.md, Decision 2).
+
+A Paragraph is dropped if it is an empty non-list paragraph — a layout spacer.
 
 KEY INSIGHT — read every cell of a row, not just the first.
 This CV's table is mixed: most rows are one merged cell (gridSpan=5), but the
@@ -19,8 +24,11 @@ the first cell is the content, the last cell is the date column, paired with
 the content paragraphs by index.
 """
 
+from docx import Document
 from docx.oxml.ns import qn
 from docx.table import _Cell
+
+from models import Paragraph
 
 
 def effective_size(para):
@@ -68,34 +76,44 @@ def _date_cell_texts(tc):
     return texts
 
 
-def extract_paragraphs(doc):
-    """Flatten the document into a list of paragraph records.
+def _make_paragraph(para, in_table, date=""):
+    """Build one Paragraph from a python-docx paragraph object.
 
-    Each record: text, style, size, bold, is_list, override, in_table, words,
-    date. Walks document-body paragraphs and table cells. Empty non-list
+    Returns None for an empty non-list paragraph (a layout spacer), so the
+    caller can skip it. `style_name` keeps the Phase 1 "(none)" sentinel for a
+    styleless paragraph rather than None — downstream code does
+    `style.startswith("Heading")` and must not see None for a .docx.
+    """
+    text = para.text.strip()
+    is_list = has_numbering(para)
+    if not text and not is_list:
+        return None  # spacer paragraph
+    return Paragraph(
+        text=text,
+        style_name=para.style.name if para.style else "(none)",
+        rendered_size=effective_size(para),
+        is_bold=any(r.bold for r in para.runs),
+        has_num_pr=is_list,
+        in_table=in_table,
+        source_format="docx",
+        date=date,
+        override=any(r.font.size is not None for r in para.runs),
+    )
+
+
+def load_docx(path):
+    """Flatten a .docx file into a list of Paragraph objects.
+
+    Walks document-body paragraphs first, then table cells. Empty non-list
     paragraphs are dropped — they are layout spacers.
     """
-    records = []
-
-    def add(para, in_table, date=""):
-        text = para.text.strip()
-        is_list = has_numbering(para)
-        if not text and not is_list:
-            return  # spacer paragraph
-        records.append({
-            "text": text,
-            "style": para.style.name if para.style else "(none)",
-            "size": effective_size(para),
-            "bold": any(r.bold for r in para.runs),
-            "is_list": is_list,
-            "override": any(r.font.size is not None for r in para.runs),
-            "in_table": in_table,
-            "words": len(text.split()),
-            "date": date,
-        })
+    doc = Document(str(path))
+    paragraphs = []
 
     for para in doc.paragraphs:
-        add(para, in_table=False)
+        p = _make_paragraph(para, in_table=False)
+        if p is not None:
+            paragraphs.append(p)
 
     for table in doc.tables:
         for tr in table._tbl.tr_lst:
@@ -118,6 +136,7 @@ def extract_paragraphs(doc):
                 if not is_list and date_idx < len(dates):
                     date = dates[date_idx]
                     date_idx += 1
-                add(para, in_table=True, date=date)
+                paragraphs.append(
+                    _make_paragraph(para, in_table=True, date=date))
 
-    return records
+    return paragraphs

@@ -25,6 +25,12 @@ data/*.txt
 !data/sample_cv.docx
 
 # outputs/ is tracked intentionally — holds the sample CV's example artifacts.
+# Phase 2 validation outputs are NOT — they contain real CV text from the
+# private cv2/cv3 documents the cross-document run is built on.
+outputs/phase2_validation/
+# analyse.py --trace dumps the raw Mistral prompt + response for debugging.
+# Useful locally, noisy in git — and may incidentally capture document text.
+outputs/*_trace.txt
 
 # Claude Code local settings (machine-specific)
 .claude/settings.local.json

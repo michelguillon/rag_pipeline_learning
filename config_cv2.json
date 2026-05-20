@@ -1,0 +1,20 @@
+{
+  "strategy": "A2",
+  "document_type": "linear",
+  "fingerprint_rules": [
+    { "signal": "has_numPr",          "role": "bullet" },
+    { "signal": "rendered_size==12",  "role": "section_header" },
+    { "signal": "rendered_size==20",  "role": "section_header" },
+    { "signal": "is_bold",            "role": "job_title" }
+  ],
+  "collections": {
+    "A":  ["cv2_role_cosine",   "cv2_role_l2"],
+    "A2": ["cv2_bullet_cosine", "cv2_bullet_l2"]
+  },
+  "metadata_fields": ["company", "job_title", "dates", "section_name"],
+  "prefix_template": "Role: {job_title} at {company} ({dates}), Section: {section_name}. Context: ",
+  "consistency_flags": [
+    "4 paragraph(s) are larger than body text (10.0pt) but use NO heading style ('GAUTHAM DILIP KRIPALANI', 'EXPERTISE', 'PROFESSIONAL EXPERIENCE') — a style-only parser would miss these as structural boundaries.",
+    "Document has NO heading styles at all — all structure is inferred from font size and bold; sections are detected by rendered_size==12, the person's name by rendered_size==20, and job titles by is_bold alone (after sections and bullets are filtered earlier in the order)."
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "strategy": "A2",
+  "document_type": "table_based",
+  "fingerprint_rules": [
+    { "signal": "has_numPr",         "role": "bullet" },
+    { "signal": "style==Title",      "role": "company" },
+    { "signal": "rendered_size==22", "role": "section_header" },
+    { "signal": "rendered_size==16", "role": "section_header" },
+    { "signal": "is_bold",           "role": "company" }
+  ],
+  "collections": {
+    "A":  ["cv3_role_cosine",   "cv3_role_l2"],
+    "A2": ["cv3_bullet_cosine", "cv3_bullet_l2"]
+  },
+  "metadata_fields": ["company", "job_title", "dates", "section_name"],
+  "prefix_template": "Role: {job_title} at {company} ({dates}), Section: {section_name}. Context: ",
+  "consistency_flags": [
+    "Bullets appear under 2 different styles (List Paragraph, Normal) — detect bullets by the numPr element, not by style name.",
+    "3 paragraph(s) are larger than body text (11.0pt) but use NO heading style ('Geoffroy de CHATEAUVIEUX', 'Education', 'And..') — a style-only parser would miss these as structural boundaries.",
+    "Companies are styled with the 'Title' paragraph style (an unusual choice) — caught explicitly by 'style==Title -> company'. One outlier company ('DIWALI PRODUCTIONS') has no Title style but is bold-no-list, caught by the trailing 'is_bold -> company' rule."
+  ]
+}

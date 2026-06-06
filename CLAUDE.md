@@ -9,25 +9,26 @@ retrieving relevant chunks on query, and generating grounded answers.
 user to *understand* every architectural decision. When implementing:
 - Explain the reasoning behind choices, not just the choice.
 - Surface tradeoffs and alternatives that were rejected and why.
-- After a concept is worked through, record the learning in [docs/LEARNING_NOTES.md](docs/LEARNING_NOTES.md).
+- After a concept is worked through, record the learning in [docs/LEARNING_NOTES_RAG_PIPELINE.md](docs/LEARNING_NOTES_RAG_PIPELINE.md).
 
 ## Sources of truth
 
 | File | Role |
 |------|------|
-| [docs/SPEC.md](docs/SPEC.md) | Phase 1 spec (Week 1, complete) — architecture decisions + history. |
-| [docs/SPEC_PHASE2.md](docs/SPEC_PHASE2.md) | Phase 2 spec — config-driven chunker, common paragraph model, PDF loader. **Complete.** |
-| [docs/LEARNING_NOTES.md](docs/LEARNING_NOTES.md) | Running record of concepts learned. Keep it updated as we progress. |
+| [docs/SPEC_RAG_PIPELINE.md](docs/SPEC_RAG_PIPELINE.md) | **The spec.** Single rolling document — Part 1 = Phase 1 (Week 1), Part 2 = Phase 2. New phases append new parts. |
+| [docs/LEARNING_NOTES_RAG_PIPELINE.md](docs/LEARNING_NOTES_RAG_PIPELINE.md) | **The learning notes.** Single rolling document — append new findings here. |
 
 If code and spec disagree, the spec wins — or flag the conflict before proceeding.
 
 ## Repo state
 
-**Phases 1 and 2 are both complete. The repo is public**
+**Phases 1 and 2 are both complete and merged to `main`. The repo is public**
 ([github.com/michelguillon/rag_pipeline_learning](https://github.com/michelguillon/rag_pipeline_learning)).
 
 - **Phase 1** built the end-to-end pipeline on a single CV: analyse → review → ingest → query, plus the 112-cell stress test.
 - **Phase 2** closed the gap the cross-CV test exposed: the chunker is now config-driven, the loader stack has a common `Paragraph` model, three structurally-different CVs validate cleanly, and a `pdfplumber` PDF loader plugs in without any change to the chunker.
+
+No phase is actively under construction. When the next phase starts, it gets appended as a new Part of [docs/SPEC_RAG_PIPELINE.md](docs/SPEC_RAG_PIPELINE.md).
 
 Data note: only `data/sample_cv.docx` (fake) is committed/public; the real CV
 and friends' CVs stay git-ignored. `data/*.pdf` is git-ignored too (drop a PDF
@@ -72,7 +73,7 @@ Human-in-the-loop by design: `analyse.py` and `review_chunks.py` print and wait 
   means re-indexing the whole corpus. Same model for documents and queries — always.
 - **ChromaDB**: `PersistentClient(path="./chroma_db")`. Distance metric is set at
   collection creation and is **immutable** after.
-- **Signal grammar is a decision LIST, not an expression tree.** `chunker.parse_signal` accepts four single signals (`has_numPr`, `is_bold`, `rendered_size==n`, `style==name`) and explicitly rejects `&&`/`||`. Use ordered single-signal rules; let order disambiguate overlaps. See [docs/LEARNING_NOTES.md](docs/LEARNING_NOTES.md) "Phase 2 — Decision lists vs expression trees".
+- **Signal grammar is a decision LIST, not an expression tree.** `chunker.parse_signal` accepts four single signals (`has_numPr`, `is_bold`, `rendered_size==n`, `style==name`) and explicitly rejects `&&`/`||`. Use ordered single-signal rules; let order disambiguate overlaps. See [docs/LEARNING_NOTES_RAG_PIPELINE.md](docs/LEARNING_NOTES_RAG_PIPELINE.md) "Phase 2 — Decision lists vs expression trees".
 - **No venv** — dependencies run in Docker (or installed globally for the basics file).
 - **API key** lives in a git-ignored `.env`; never commit it. Docker Compose reads it automatically.
 - Platform is **Windows / PowerShell**. Docker Desktop is installed.
@@ -92,7 +93,7 @@ This is a learning project, so the code itself must teach. Every script must car
 This matches the style of [mistral_basics.py](mistral_basics.py) (the old
 `rag_pipeline.py` prototype, now deleted, also used it). When a script is rewritten
 to the spec's architecture, it must keep — or exceed — that level of annotation.
-Concepts worked through also get a short entry in [docs/LEARNING_NOTES.md](docs/LEARNING_NOTES.md).
+Concepts worked through also get a short entry in [docs/LEARNING_NOTES_RAG_PIPELINE.md](docs/LEARNING_NOTES_RAG_PIPELINE.md).
 
 ## Running
 
@@ -116,11 +117,10 @@ small-vs-large model stress comparison was skipped on the free tier.
 different CVs, PDF loader via pdfplumber. The Phase 1 cross-CV failure (mega-
 chunks on cv2/cv3) is gone — only `fingerprint_rules` changes between CVs.
 
-**Open next.** The natural follow-on is multi-document Q&A: today the pipeline
-indexes one CV at a time into per-CV collections; an RFI/RFP context wants
-multiple documents in one searchable corpus with metadata-filtered retrieval.
-That is also where the "pluggable strategy registry" sketch in Phase 1's spec
-becomes concrete — different document classes need different chunking strategies.
+**No active phase.** The next phase will be written up as a new Part in
+[docs/SPEC_RAG_PIPELINE.md](docs/SPEC_RAG_PIPELINE.md). The current branch is
+`feature/rfi-pipeline` — name is historical; consider renaming/closing if no
+further work lands on it.
 
 ## A note on hierarchical CLAUDE.md
 

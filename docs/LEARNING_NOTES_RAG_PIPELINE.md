@@ -166,7 +166,7 @@ enumerate every distinct formatting fingerprint (style, size, bold, list-or-not)
 with counts and samples, and emit a consistency report flagging where styling
 is inconsistent. A human + the LLM then map fingerprints to roles. This makes
 the analyser document-agnostic — it discovers structure rather than assuming it,
-so the same tool works on a CV, an RFI, or an RFP.
+so the same tool works on any structured document, not just this CV.
 
 **The client takeaway.** "Will your RAG work on our documents?" — the honest
 answer is *not until you have profiled them*. Document-structure inconsistency
@@ -740,9 +740,8 @@ the loader stack accepts a new file format with one new file and one
 dispatch entry.
 
 **What's open next.** Multi-document Q&A. Today the pipeline indexes one
-document at a time into per-CV collections; an RFI/RFP context wants a
-multi-document searchable corpus with metadata-filtered retrieval. That
-is also where the Phase 1 spec's "pluggable strategy registry" sketch
-becomes concrete — different document classes (CV vs RFI vs report) need
-different chunking strategies, not just different `fingerprint_rules` in
-the same strategy.
+document at a time into per-CV collections; a multi-document context wants
+a single searchable corpus with metadata-filtered retrieval. That is also
+where the Phase 1 spec's "pluggable strategy registry" sketch becomes
+concrete — different document classes need different chunking strategies,
+not just different `fingerprint_rules` in the same strategy.

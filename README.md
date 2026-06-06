@@ -6,9 +6,10 @@ question, and has Mistral generate an answer grounded **only** in those chunks.
 
 Built as an AI learning project. The point was not just working code —
 it was to understand and document *every* architectural decision. The reasoning
-lives in [docs/SPEC.md](docs/SPEC.md) (Phase 1 spec),
-[docs/SPEC_PHASE2.md](docs/SPEC_PHASE2.md) (Phase 2 spec), and
-[docs/LEARNING_NOTES.md](docs/LEARNING_NOTES.md) (what each phase taught).
+lives in [docs/SPEC_RAG_PIPELINE.md](docs/SPEC_RAG_PIPELINE.md) (the spec,
+in two parts: Phase 1 and Phase 2) and
+[docs/LEARNING_NOTES_RAG_PIPELINE.md](docs/LEARNING_NOTES_RAG_PIPELINE.md)
+(what each phase taught).
 
 ---
 
@@ -98,7 +99,7 @@ re-spending API.
 
 ## Architectural decisions
 
-Full reasoning is in [docs/SPEC.md](docs/SPEC.md) and [docs/SPEC_PHASE2.md](docs/SPEC_PHASE2.md). The load-bearing ones:
+Full reasoning is in [docs/SPEC_RAG_PIPELINE.md](docs/SPEC_RAG_PIPELINE.md). The load-bearing ones:
 
 - **Semantic chunking, not fixed-size.** Each chunk is a structural unit (a
   role, or a bullet) — no chunk-size or overlap parameter. Two strategies are
@@ -197,7 +198,7 @@ agnostic pipeline" claim demonstrated end-to-end.
 Full per-question results live in `outputs/phase2_validation/comparison.md`
 (git-ignored — contains real CV text). Findings, decision-list reasoning, and
 the Mistral compound-signal anecdote are in
-[docs/LEARNING_NOTES.md](docs/LEARNING_NOTES.md).
+[docs/LEARNING_NOTES_RAG_PIPELINE.md](docs/LEARNING_NOTES_RAG_PIPELINE.md).
 
 ---
 
@@ -243,7 +244,7 @@ ceremonial.
 | Area | This project | Production |
 |------|-------------|------------|
 | Chunking | ✅ Config-driven decode (Phase 2), derived per-document by `analyse.py` + human approval | — |
-| Format support | ✅ `.docx` + `.pdf` via a common `Paragraph` model and a `load(path)` dispatcher (Phase 2) | Pluggable chunking-**strategy** registry per document class (CV vs RFP vs report) — the loader story is done; the strategy story remains |
+| Format support | ✅ `.docx` + `.pdf` via a common `Paragraph` model and a `load(path)` dispatcher (Phase 2) | Pluggable chunking-**strategy** registry per document class (CV vs contract vs report) — the loader story is done; the strategy story remains |
 | Vector store | ChromaDB (local) | Pinecone / pgvector when corpus > ~1M vectors or multi-tenant |
 | API tier | Mistral free tier (rate-limited) | Paid tier; batch embedding |
 | Corpus | Single document per ingestion run | Multi-document corpus with metadata-filtered retrieval (by company / date / tenant) — the real scaling lever |
